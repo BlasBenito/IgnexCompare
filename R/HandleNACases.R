@@ -27,10 +27,10 @@ HandleNACases=function(sequence=NULL, sequence.name=NULL, if.empty.cases=NULL){
     sequence.name=""
   }
 
-  # #error if it was not set properly
-  # if (if.empty.cases!="omit" | if.empty.cases!="interpolate"){
-  #   stop("Wrong value in the argument 'if.empty.cases'. It can only have the values 'omit' or 'interpolate'.")
-  # }
+  #error if it was not set properly
+  if (if.empty.cases!="omit" & if.empty.cases!="interpolate"){
+    stop("Wrong value in the argument 'if.empty.cases'. It can only have the values 'omit' or 'interpolate'.")
+  }
 
   #message
   cat(paste("Handling empty and NA cases of the sequence '", sequence.name,"'.", sep=" "), sep="\n")

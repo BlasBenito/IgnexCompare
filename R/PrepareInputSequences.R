@@ -158,6 +158,20 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
 
   }
 
+  #CREATING ROWNAMES FOR DATAFRAMES (to be used for the matrixes also)
+  rownames.sequence.A=1:nrow(sequence.A)
+  rownames.sequence.B=1:nrow(sequence.B)
+
+  #COERCING INTO MATRIX
+  sequence.A=as.matrix(sequence.A)
+  sequence.B=as.matrix(sequence.B)
+
+  #NAMES TO COLS AND ROWS
+  colnames(sequence.A)=common.column.names
+  colnames(sequence.B)=common.column.names
+  rownames(sequence.A)=rownames.sequence.A
+  rownames(sequence.B)=rownames.sequence.B
+
 
   #PREPARING RESULTS
 
