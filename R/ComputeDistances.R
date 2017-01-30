@@ -12,6 +12,6 @@
 #' @export
 ComputeDistances=function(distance.matrix, random.walk){
   #get matrix values
-  random.walk$distances=distance.matrix[cbind(random.walk$a, random.walk$b)]
+  random.walk$distances=distance.matrix[cbind(random.walk$b, random.walk$a)]
   return(random.walk)
 }

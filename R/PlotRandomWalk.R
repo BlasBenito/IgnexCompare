@@ -17,13 +17,11 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-PlotDistanceMatrix=function(distance.matrix){
+PlotRandomWalk=function(distance.matrix, random.walk){
 
-  require(fields)
+  require(gplots)
 
-  x.axis=as.numeric(rownames(distance.matrix))
-  y.axis=as.numeric(colnames(distance.matrix))
-
-  image.plot(x.axis, y.axis, distance.matrix, xlab="Sequence A", ylab="Sequence B", main="Manhattan dissimilarity.")
+  PlotDistanceMatrix(distance.matrix)
+  lines(random.walk$b, random.walk$a, lwd=2, col="black")
 
 }
