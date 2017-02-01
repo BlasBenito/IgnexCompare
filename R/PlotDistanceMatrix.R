@@ -19,11 +19,12 @@
 #' @export
 PlotDistanceMatrix=function(distance.matrix){
 
-  require(fields)
+  # require(fields)
+  require(RColorBrewer)
 
   x.axis=as.numeric(rownames(distance.matrix))
   y.axis=as.numeric(colnames(distance.matrix))
 
-  image.plot(x.axis, y.axis, distance.matrix, xlab="Sequence A", ylab="Sequence B", main="Manhattan dissimilarity.")
+  image.plot(x.axis, y.axis, distance.matrix, xlab="Sequence A", ylab="Sequence B", main="Manhattan dissimilarity.", col=rev(brewer.pal(9, "RdBu")))
 
 }

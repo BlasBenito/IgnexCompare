@@ -21,3 +21,13 @@ FirstUp = function(x) {
   substr(x, 1, 1) <- toupper(substr(x, 1, 1))
   x
 }
+
+#' @export
+is.even <- function(x){
+  x %% 2 == 0
+}
+
+#' @export
+is.odd <- function(x){
+  x %% 2 != 0
+}
