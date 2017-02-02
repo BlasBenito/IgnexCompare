@@ -70,10 +70,6 @@ LeastCostNN=function(distance.matrix){
 
   }
 
-  #plotting result
-  PlotDistanceMatrix(distance.matrix)
-  lines(path.rows, path.cols)
-
   #creating dataframe
   solution=data.frame(a=path.rows, b=path.cols)
 

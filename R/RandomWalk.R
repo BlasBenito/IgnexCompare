@@ -22,10 +22,8 @@ RandomWalk=function(distance.matrix){
   path.cols=vector()
   path.rows[1]=current.row
   path.cols[1]=current.col
-  moves.left.col=last.col-1
-  moves.left.row=last.row-1
 
-  #finding least cost path in the coarse matrix
+  #random walk
   repeat{
 
       #tossing a coin
