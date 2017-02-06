@@ -21,13 +21,6 @@
 #' @export
 PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B=NULL, sequence.B.name=NULL, if.empty.cases=NULL, rescale=NULL){
 
-  #input data to test the function
-  sequence.A=SequenceA
-  sequence.A.name="Abernethy Forest 1970"
-  sequence.B=SequenceC
-  sequence.B.name="Abernethy Forest 1974"
-  if.empty.cases="interpolate"
-
   #CHECKING INPUT DATA
   #defining the default value for fuzzy match
   if (is.null(if.empty.cases)){if.empty.cases="omit"}
