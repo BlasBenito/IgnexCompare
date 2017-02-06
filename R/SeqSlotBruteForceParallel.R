@@ -12,11 +12,11 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-SeqSlotBruteForceParallel=function(distance.matrix=NULL, iterations=NULL, compute.p.value=NULL, cores=NULL){
+SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.value=NULL, cores=NULL){
 
   #initial checks
-  if (is.null(distance.matrix)){
-    stop("WOOOSH! No distance matrix provided, aborting.")
+  if (is.null(sequences)){
+    stop("WOOOSH! No input data provided, aborting.")
   }
 
   if (is.null(iterations)){
@@ -29,6 +29,15 @@ SeqSlotBruteForceParallel=function(distance.matrix=NULL, iterations=NULL, comput
     cat("The argument 'compute.p.value' is empty, using default value (FALSE).", sep="\n")
     compute.p.value=FALSE
   }
+
+  #checking if there is a distance matrix in the input object
+  if ("distance.matrix" %not-in% names(sequences)){
+    message("WARNING: I did not found a distance.matrix object in the input list, but I am very nice, and will compute it for you right away (using the Manhattan method)!")
+    sequences=DistanceMatrix(sequences=sequences, method="manhattan")
+  }
+
+  #getting input data
+  distance.matrix=sequences$distance.matrix
 
   #setting initial value for old cost
   starting.random.walk=LeastCostNNRandom(distance.matrix, random.threshold = 0.1)
@@ -50,30 +59,59 @@ SeqSlotBruteForceParallel=function(distance.matrix=NULL, iterations=NULL, comput
   registerDoParallel(clus)
 
   #exporting cluster variables
-  clusterExport(cl=clus, varlist=c('distance.matrix', 'compute.p.value', 'SeqSlotBruteForceForParallel', 'LeastCostNNRandom', 'ComputeDistances'), envir=environment())
+  clusterExport(cl=clus, varlist=c('SeqSlotBruteForceForParallel', 'LeastCostNNRandom', 'ComputeDistances', 'RandomWalk'), envir=environment())
 
   #iterations per thread
   iterations.per.thread=round(iterations/cores, 0)
 
   #parallel execution of SinglePollenTypeToSpecies
-  results.foreach=foreach(dummy=1:cores, .combine=cbind) %dopar% SeqSlotBruteForceForParallel(distance.matrix=distance.matrix, iterations=iterations.per.thread, compute.p.value=compute.p.value, starting.cost=starting.cost)
+  results.foreach=foreach(dummy=1:cores, .combine=cbind) %dopar% SeqSlotBruteForceForParallel(sequences=sequences, iterations=iterations.per.thread, compute.p.value=compute.p.value, starting.cost=starting.cost)
 
   stopCluster(clus)
 
-  return(results.foreach)
+  #PROCESSING results.foreach
+  n.solutions=ncol(results.foreach)
+
+  #final solution (we get the first column of the list of lists)
+  parallel.slotting.solution=results.foreach[, 1]
+  # slotting.iterations (sum)
+  parallel.slotting.solution$slotting.iterations=sum(unlist(results.foreach["slotting.iterations", ]))
+  # lowest costs (c and order)
+  parallel.slotting.solution$lowest.costs=rev(sort(unlist(results.foreach["lowest.costs", ])))
+
+  #select column with lower best.slotting.cost, and from that column, get
+  best.slotting.values=unlist(results.foreach["best.slotting.cost", ])
+  best.slotting.column=which(best.slotting.values==min(best.slotting.values))
+  # best.slotting
+  parallel.slotting.solution$best.slotting=data.frame(results.foreach["best.slotting", best.slotting.column])
+  # best slotting.cost
+  parallel.slotting.solution$best.slotting.cost=unlist(results.foreach["best.slotting.cost", best.slotting.column])
+  # psi
+  parallel.slotting.solution$psi=unlist(results.foreach["psi", best.slotting.column])
+  # p.value (sum all p.values)
+  parallel.slotting.solution$p.value=sum(unlist(results.foreach["p.value", ]))
+
+  #plot
+  PlotSlotting(slotting=parallel.slotting.solution)
+
+  return(parallel.slotting.solution)
+
 
 }
 
 
 #' @export
-SeqSlotBruteForceForParallel=function(distance.matrix, iterations, compute.p.value, dummy=dummy, starting.cost=starting.cost){
+SeqSlotBruteForceForParallel=function(sequences, iterations, compute.p.value, dummy=dummy, starting.cost=starting.cost){
 
   #generating a random seed
   set.seed(sample(1:1000, size=1))
 
+  #extracting objects from the input list
+  distance.matrix=sequences$distance.matrix
+  sum.distances.sequence.A=sequences$sum.distances.sequence.A
+  sum.distances.sequence.B=sequences$sum.distances.sequence.B
 
   #results objects
-  results=list()
   best.distances=vector()
   best.solution=data.frame()
   old.cost=starting.cost
@@ -95,15 +133,22 @@ SeqSlotBruteForceForParallel=function(distance.matrix, iterations, compute.p.val
     }
   }#end of iteration
 
-  #WRITING RESULTS
-  results[[1]]=distance.matrix
-  results[[2]]=iterations
-  results[[3]]=best.solution
-  results[[4]]=best.distances[length(best.distances)]
-  results[[5]]=best.distances
-  results[[6]]="Not computed"
+  #COMPUTING PSI
+  best.solution.cost=best.distances[length(best.distances)]
+  sum.distances.sequences=sum.distances.sequence.A+sum.distances.sequence.B
+  psi = (best.solution.cost - sum.distances.sequences) / sum.distances.sequences
 
-  names(results)=c("distance.matrix", "iterations", "best.solution", "cost.of.best.solution", "costs.of.all.solutions", "random.distances")
+  #WRITTING RESULTS
+  #############################################################################
+  previous.names=names(sequences)
+  sequences[[9]]=iterations
+  sequences[[10]]=best.distances
+  sequences[[11]]=best.solution
+  sequences[[12]]=best.solution.cost
+  sequences[[13]]=psi
+  sequences[[14]]="Not computed"
+
+  names(sequences)=c(previous.names, "slotting.iterations", "lowest.costs", "best.slotting", "best.slotting.cost", "psi", "p.value")
 
   #COMPUTING PVALUE
   #################
@@ -112,7 +157,7 @@ SeqSlotBruteForceForParallel=function(distance.matrix, iterations, compute.p.val
     #results objects
     random.distances=vector()
 
-    lowest.cost=results[[4]]=best.distances[length(best.distances)]
+    lowest.cost=sequences$best.slotting.cost
 
     #counting results better than best solution
     best.than=0
@@ -126,10 +171,11 @@ SeqSlotBruteForceForParallel=function(distance.matrix, iterations, compute.p.val
 
     }
 
-    results$random.distances=random.distances
+    #p-value
+    sequences$p.value=best.than/iterations
 
   }#end of COMPUTING P VALUE
 
-  return(results)
+  return(sequences)
 
 }

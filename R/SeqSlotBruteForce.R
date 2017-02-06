@@ -12,11 +12,11 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-SeqSlotBruteForce=function(distance.matrix=NULL, iterations=NULL, compute.p.value=NULL){
+SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL){
 
   #initial checks
-  if (is.null(distance.matrix)){
-    stop("WOOOSH! No distance matrix provided, aborting.")
+  if (is.null(sequences)){
+    stop("WOOOSH! No input file provided, aborting.")
     }
 
   if (is.null(iterations)){
@@ -30,8 +30,18 @@ SeqSlotBruteForce=function(distance.matrix=NULL, iterations=NULL, compute.p.valu
     compute.p.value=FALSE
   }
 
+  #checking if there is a distance matrix in the input object
+  if ("distance.matrix" %not-in% names(sequences)){
+    message("WARNING: I did not found a distance.matrix object in the input list, but I am very nice, and will compute it for you right away (using the Manhattan method)!")
+    sequences=DistanceMatrix(sequences=sequences, method="manhattan")
+  }
+
+  #extracting objects from the input list
+  distance.matrix=sequences$distance.matrix
+  sum.distances.sequence.A=sequences$sum.distances.sequence.A
+  sum.distances.sequence.B=sequences$sum.distances.sequence.B
+
   #results objects
-  results=list()
   best.distances=vector()
   best.solution=data.frame()
 
@@ -40,19 +50,19 @@ SeqSlotBruteForce=function(distance.matrix=NULL, iterations=NULL, compute.p.valu
   old.cost=sum(starting.random.walk$distances)
 
   #message
-  cat(paste("Generating", iterations, "search paths. I'll be roasting your CPU for a while, will be back soon..."), sep="\n")
+  cat(paste("Generating", iterations, "slottings. I'll be roasting your CPU for a while, will be back soon..."), sep="\n")
 
   #iterating
   for (i in 1:iterations){
     #generating a random walk
-    temp.solution=LeastCostNNRandom(manhattan.matrix, random.threshold = 0.1)
+    temp.solution=LeastCostNNRandom(distance.matrix, random.threshold = 0.1)
 
     #computing the new cost
     new.cost=sum(temp.solution$distances)
 
     #if new.cost is lower or equal than old.cost
     if (new.cost <= old.cost){
-      print(paste("New best solution found, cost =", new.cost, sep=" "))
+      print(paste("Lowest cost =", new.cost, sep=" "))
       old.cost=new.cost
       best.solution = temp.solution
       best.distances=c(best.distances, old.cost)
@@ -60,32 +70,37 @@ SeqSlotBruteForce=function(distance.matrix=NULL, iterations=NULL, compute.p.valu
   }#end of iteration
   cat("Done!", sep="\n")
 
-  #PLOTTING
-  par(mfrow=c(2,1))
-  PlotDistanceMatrix(distance.matrix, main="Best solution", path=best.solution)
-  plot(best.distances, type="l", xlab="Solutions", ylab="Cost", main="Improvement")
+  #COMPUTING PSI
+  best.solution.cost=best.distances[length(best.distances)]
+  sum.distances.sequences=sum.distances.sequence.A+sum.distances.sequence.B
+  psi = (best.solution.cost - sum.distances.sequences) / sum.distances.sequences
+
+  cat(paste("The psi value is", round(psi, 4), sep=" "), sep="\n")
 
   #WRITING RESULTS
-  results[[1]]=distance.matrix
-  results[[2]]=iterations
-  results[[3]]=best.solution
-  results[[4]]=best.distances[length(best.distances)]
-  results[[5]]=best.distances
-  results[[6]]="Not computed"
+  #####################################################################
+  previous.names=names(sequences)
 
-  names(results)=c("distance.matrix", "iterations", "best.solution", "cost.of.best.solution", "costs.of.all.solutions", "p.value")
+  sequences[[9]]=iterations
+  sequences[[10]]=best.distances
+  sequences[[11]]=best.solution
+  sequences[[12]]=best.solution.cost
+  sequences[[13]]=psi
+  sequences[[14]]="Not computed"
+
+  names(sequences)=c(previous.names, "slotting.iterations", "lowest.costs", "best.slotting", "best.slotting.cost", "psi", "p.value")
 
   #COMPUTING PVALUE
   #################
   if (compute.p.value==TRUE){
 
-    lowest.cost=results[[4]]=best.distances[length(best.distances)]
+    lowest.cost=sequences$best.slotting.cost
 
     #counting results better than best solution
     best.than=0
 
     #message
-    cat(paste("Generating", iterations, "permutations to compute a p-value. I'll be roasting your CPU for a while, AGAIN!"), sep="\n")
+    cat("Computing p-value...", sep="\n")
 
     #generating random walks
     for (i in 1:iterations){
@@ -99,16 +114,15 @@ SeqSlotBruteForce=function(distance.matrix=NULL, iterations=NULL, compute.p.valu
     }
 
     #p-value
-    results$p.value=best.than/iterations
+    sequences$p.value=best.than/iterations
 
-    cat(paste("Done! p-value =", results$p.value, sep=" "), sep="\n")
-
-    if (results$p.value==0){
-      message("WARNING: the p-value is 0. Maybe the solution is awesome, or maybe the number of iterations was not enough!")
-    }
+    cat(paste("Done! p-value =", sequences$p.value, sep=" "), sep="\n")
 
   }#end of COMPUTING P VALUE
 
-  return(results)
+  #plot
+  PlotSlotting(slotting=sequences)
+
+  return(sequences)
 
 }
