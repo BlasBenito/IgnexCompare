@@ -121,7 +121,7 @@ SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL
   }#end of COMPUTING P VALUE
 
   #plot
-  PlotSlotting(slotting=sequences)
+  # PlotSlotting(slotting=sequences)
 
   return(sequences)
 
