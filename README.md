@@ -52,6 +52,6 @@ microbenchmark(SeqSlotBruteForce(sequences=sequences, iterations=10000, compute.
 microbenchmark(SeqSlotBruteForceParallel(sequences=sequences, iterations=10000, compute.p.value=TRUE, max.random.threshold = 0.5), times=15)
 #      min       lq     mean   median       uq      max neval
 # 2.824353 2.874306 2.953351 2.933804 3.016951 3.106423    15
-
+#NOTE: The advantage of the parallel version gains importance with increased sizes of the parameter iterations. For 100000 iterations, the average execution time was 90 vs 18 seconds.
 ```
 
