@@ -1,10 +1,13 @@
 #' Sequence Slotting by brute force
 #'
-#' description
+#' It takes as inputs two pollen sequences produced by the function \emph{PrepareInputSequences}, and computes the best slotting.
 #'
 #' @usage
 #'
-#' @param param Number of rows of the results table.
+#' @param sequences A list produced by the function \emph{PrepareInputSequences} or \emph{DistanceMatrix}
+#' @param iterations Number of iterations (Default value is 10000).
+#' @param compute.p.value Logical value (TRUE or FALSE). Set to TRUE to compute a p-value based on a permutation test.
+#' @param max.random.threshold Number in the interval [0, 1], determining the proportion of the steps defined by chance during the search for the best slotting solution.
 #' @author Blas Benito <blasbenito@gmail.com>
 #' @examples
 #'
@@ -12,7 +15,7 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL){
+SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL, max.random.threshold=NULL){
 
   #initial checks
   if (is.null(sequences)){
@@ -21,7 +24,7 @@ SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL
 
   if (is.null(iterations)){
     cat("Iterations argument was not provided, using default value (500000).", sep="\n")
-    iterations=500000
+    iterations=10000
   }
 
   #initial checks
@@ -29,6 +32,13 @@ SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL
     cat("The argument 'compute.p.value' is empty, using default value (FALSE).", sep="\n")
     compute.p.value=FALSE
   }
+
+  #initial checks
+  if (is.null(max.random.threshold)){
+    cat("The argument max.random.threshold was set to 0.2.", sep="\n")
+    max.random.threshold=0.2
+  }
+
 
   #checking if there is a distance matrix in the input object
   if ("distance.matrix" %not-in% names(sequences)){
@@ -46,7 +56,7 @@ SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL
   best.solution=data.frame()
 
   #setting initial value for old cost
-  starting.random.walk=LeastCostNNRandom(distance.matrix, random.threshold = 0.1)
+  starting.random.walk=LeastCostNNRandom(distance.matrix, max.random.threshold = max.random.threshold)
   old.cost=sum(starting.random.walk$distances)
 
   #message
@@ -55,14 +65,14 @@ SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL
   #iterating
   for (i in 1:iterations){
     #generating a random walk
-    temp.solution=LeastCostNNRandom(distance.matrix, random.threshold = 0.1)
+    temp.solution=LeastCostNNRandom(distance.matrix, max.random.threshold = max.random.threshold)
 
     #computing the new cost
     new.cost=sum(temp.solution$distances)
 
     #if new.cost is lower or equal than old.cost
     if (new.cost <= old.cost){
-      print(paste("Lowest cost =", new.cost, sep=" "))
+      cat(paste("Lowest cost =", new.cost, sep=" "), sep="\n")
       old.cost=new.cost
       best.solution = temp.solution
       best.distances=c(best.distances, old.cost)
@@ -71,7 +81,7 @@ SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL
   cat("Done!", sep="\n")
 
   #COMPUTING PSI
-  best.solution.cost=best.distances[length(best.distances)]
+  best.solution.cost=(sum(best.solution$distances)*2)+(best.solution[1, "distances"]*2)
   sum.distances.sequences=sum.distances.sequence.A+sum.distances.sequence.B
   psi = (best.solution.cost - sum.distances.sequences) / sum.distances.sequences
 
@@ -107,7 +117,7 @@ SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL
 
       random.walk=ComputeDistances(distance.matrix, RandomWalk(distance.matrix))
 
-      if (sum(random.walk$distances) < lowest.cost){
+      if (((sum(random.walk$distances)*2)+(random.walk[1, "distances"]*2)) < lowest.cost){
           best.than=best.than + 1
       }
 
@@ -121,7 +131,7 @@ SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL
   }#end of COMPUTING P VALUE
 
   #plot
-  # PlotSlotting(slotting=sequences)
+  PlotSlotting(slotting=sequences)
 
   return(sequences)
 

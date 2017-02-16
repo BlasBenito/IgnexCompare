@@ -19,12 +19,28 @@
 #' @examples
 #' data(InputDataExample)
 #' @export
-PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B=NULL, sequence.B.name=NULL, if.empty.cases=NULL, rescale=NULL){
+PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B=NULL, sequence.B.name=NULL, if.empty.cases=NULL, output.type=NULL){
+
+  #OUTPUT TYPES
+  # "rescaled"
+  # "proportion"
+  # "percentage"
+  # "rescaled-proportion"
+  # "rescaled-percentage"
 
   #CHECKING INPUT DATA
   #defining the default value for fuzzy match
   if (is.null(if.empty.cases)){if.empty.cases="omit"}
-  if (is.null(rescale)){rescale=FALSE}
+
+  #SETTING A DEFAULT VALUE FOR output.type ("raw" returns raw pollen counts).
+  if (is.null(output.type)){
+    message("Warning, output.type was ommited, returning raw pollen counts.")
+    output.type="raw"
+  }
+
+  if (output.type %not-in% c("raw", "rescaled", "proportion", "percentage", "rescaled-proportion", "rescaled-percentage")){
+    stop("The value of output.type should be one of those: 'raw', 'rescaled', 'proportion', 'percentage', 'rescaled', or 'percentage'.")
+  }
 
   #data not provided
   if (is.null(sequence.A)){
@@ -50,6 +66,7 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
 
   #TESTING DATASETS
   #####################
+  #####################
   cat("Checking input datasets...", sep="\n")
 
 
@@ -69,7 +86,6 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
   #OVERLAP OF COMMON COLUMN NAMES
   common.column.names=intersect(colnames(sequence.A), colnames(sequence.B))
 
-
   #ORIGINAL DIMENSIONS OF THE TABLES
   sequence.A[is.na(sequence.A=="")]=NA
   sequence.B[is.na(sequence.B=="")]=NA
@@ -79,7 +95,6 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
   original.nrow.sequence.B=nrow(sequence.B)
   original.ncol.sequence.A=ncol(sequence.A)
   original.ncol.sequence.B=ncol(sequence.B)
-
 
 
   #WHAT COLUMNS WERE REMOVED FROM THE TARGET DATASET?
@@ -127,9 +142,42 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
   final.na.sequence.B=sum(is.na(sequence.B))
 
 
-  #NORMALIZING DATA
+  #COMPUTING POLLEN PROPORTIONS
+  #############################
+  if (output.type=="proportion"){
+
+    sequence.A=sweep(sequence.A, 1, rowSums(sequence.A), FUN="/")
+    sequence.B=sweep(sequence.B, 1, rowSums(sequence.B), FUN="/")
+
+  }
+
+  #COMPUTING POLLEN PERCENTAGE
+  ############################
+  if (output.type=="percentage"){
+
+    sequence.A=sweep(sequence.A, 1, rowSums(sequence.A), FUN="/")*100
+    sequence.B=sweep(sequence.B, 1, rowSums(sequence.B), FUN="/")*100
+
+  }
+
+
+  #RESCALING DATA
   #################
-  if (rescale==TRUE){
+  if (output.type=="rescaled" | output.type=="rescaled-proportion" | output.type=="rescaled-percentage"){
+
+    #COMPUTING PROPORTION
+    if (output.type=="rescaled-proportion"){
+
+      sequence.A=sweep(sequence.A, 1, rowSums(sequence.A), FUN="/")
+      sequence.B=sweep(sequence.B, 1, rowSums(sequence.B), FUN="/")
+    }
+
+    #COMPUTING PERCENTAGE
+    if (output.type=="rescaled-percentage"){
+
+      sequence.A=sweep(sequence.A, 1, rowSums(sequence.A), FUN="/")*100
+      sequence.B=sweep(sequence.B, 1, rowSums(sequence.B), FUN="/")*100
+    }
 
     #adding temporary columns to sequences to make identification easier
     sequence.A$id="A"
@@ -145,12 +193,11 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
     sequence.A=sequence.temp[which(sequence.temp$id=="A"),common.column.names]
     sequence.B=sequence.temp[which(sequence.temp$id=="B"),common.column.names]
 
-    #rounding
-    sequence.A=round(sequence.A, 0)
-    sequence.B=round(sequence.B, 0)
-
   }
 
+
+  #WRAPPING UP RESULT
+  ###################
   #CREATING ROWNAMES FOR DATAFRAMES (to be used for the matrixes also)
   rownames.sequence.A=1:nrow(sequence.A)
   rownames.sequence.B=1:nrow(sequence.B)
@@ -167,7 +214,7 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
 
 
   #PREPARING RESULTS
-
+  ##################
   #filling metadata
   metadata=data.frame(detail=character(10),sequence.A=character(10), sequence.B=character(10), stringsAsFactors = FALSE)
   metadata[1,1:3]=c("name", sequence.A.name, sequence.B.name)
@@ -179,7 +226,7 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
   metadata[7,1:3]=c("initial.empty.cases", original.na.sequence.A, original.na.sequence.B)
   metadata[8,1:3]=c("if.NA.cases", if.empty.cases, if.empty.cases)
   metadata[9,1:3]=c("final.NA.cases", final.na.sequence.A, final.na.sequence.B)
-  metadata[10,1:3]=c("rescaled?", rescale, rescale)
+  metadata[10,1:3]=c("output.type", output.type, output.type)
 
   #list
   result=list()
@@ -192,6 +239,4 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
   return(result)
 
 }
-
-
 

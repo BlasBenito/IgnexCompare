@@ -63,12 +63,12 @@ DistanceMatrix=function(sequences, method=NULL){
 
   #computing manhattan distance
   if (method=="manhattan"){
-    for (i in 1:nrow.sequence.A-1){
-      distances.sequence.A[i]=ManhattanDistance(sequence.A[i], sequence.A[i+1])
+    for (i in 1:(nrow.sequence.A-1)){
+      distances.sequence.A[i]=ManhattanDistance(sequence.A[i, ], sequence.A[i+1, ])
     }
 
-    for (j in 1:nrow.sequence.B-1){
-      distances.sequence.B[j]=ManhattanDistance(sequence.B[j], sequence.B[j+1])
+    for (j in 1:(nrow.sequence.B-1)){
+      distances.sequence.B[j]=ManhattanDistance(sequence.B[j, ], sequence.B[j+1, ])
     }
   }
 

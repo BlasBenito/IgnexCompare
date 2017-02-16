@@ -12,13 +12,13 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-LeastCostNNRandom=function(distance.matrix, random.threshold=NULL){
+LeastCostNNRandom=function(distance.matrix, max.random.threshold=NULL){
 
-  if (random.threshold < 0 | random.threshold > 1){
-    stop("random.threshold should be in the interval [0, 1].")
+  if (max.random.threshold <= 0 | max.random.threshold > 1){
+    stop("The argument max.random.threshold should be in the interval (0, 1].")
   }
 
-  if(is.null(random.threshold)){random.threshold=0.2}
+  if(is.null(max.random.threshold)){max.random.threshold=0.2}
 
   current.col=1
   current.row=1
@@ -28,6 +28,7 @@ LeastCostNNRandom=function(distance.matrix, random.threshold=NULL){
   path.cols=vector()
   path.rows[1]=current.row
   path.cols[1]=current.col
+  random.threshold=runif(1, 0, max.random.threshold)
 
   repeat{
 

@@ -10,8 +10,8 @@
 #' @author Blas Benito <blasbenito@gmail.com>
 #' @examples
 #' @export
-ComputeDistances=function(distance.matrix, random.walk){
+ComputeDistances=function(distance.matrix, slotting){
   #get matrix values
-  random.walk$distances=distance.matrix[cbind(random.walk$a, random.walk$b)]
-  return(random.walk)
+  slotting$distances=distance.matrix[cbind(slotting$a, slotting$b)]
+  return(slotting)
 }

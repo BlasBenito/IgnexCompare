@@ -1,10 +1,14 @@
 #' Sequence Slotting by brute force
 #'
-#' description
+#' It takes as inputs two pollen sequences produced by the function \emph{PrepareInputSequences}, and computes the best slotting.
 #'
 #' @usage
 #'
-#' @param param Number of rows of the results table.
+#' @param sequences A list produced by the function \emph{PrepareInputSequences} or \emph{DistanceMatrix}
+#' @param iterations Number of iterations (Default value is 10000).
+#' @param compute.p.value Logical value (TRUE or FALSE). Set to TRUE to compute a p-value based on a permutation test.
+#' @param max.random.threshold Number in the interval [0, 1], determining the proportion of the steps defined by chance during the search for the best slotting solution.
+#' @param cores
 #' @author Blas Benito <blasbenito@gmail.com>
 #' @examples
 #'
@@ -12,7 +16,7 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.value=NULL, cores=NULL){
+SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.value=NULL, cores=NULL, max.random.threshold=NULL){
 
   #initial checks
   if (is.null(sequences)){
@@ -30,6 +34,12 @@ SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.va
     compute.p.value=FALSE
   }
 
+  #initial checks
+  if (is.null(max.random.threshold)){
+    cat("The argument max.random.threshold was set to 0.2.", sep="\n")
+    max.random.threshold=0.2
+  }
+
   #checking if there is a distance matrix in the input object
   if ("distance.matrix" %not-in% names(sequences)){
     message("WARNING: I did not found a distance.matrix object in the input list, but I am very nice, and will compute it for you right away (using the Manhattan method)!")
@@ -40,7 +50,7 @@ SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.va
   distance.matrix=sequences$distance.matrix
 
   #setting initial value for old cost
-  starting.random.walk=LeastCostNNRandom(distance.matrix, random.threshold = 0.1)
+  starting.random.walk=LeastCostNNRandom(distance.matrix, max.random.threshold = max.random.threshold)
   starting.cost=sum(starting.random.walk$distances)
 
   #libraries
@@ -65,29 +75,39 @@ SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.va
   iterations.per.thread=round(iterations/cores, 0)
 
   #parallel execution of SinglePollenTypeToSpecies
-  results.foreach=foreach(dummy=1:cores, .combine=cbind) %dopar% SeqSlotBruteForceForParallel(sequences=sequences, iterations=iterations.per.thread, compute.p.value=compute.p.value, starting.cost=starting.cost)
+  results.foreach=foreach(dummy=1:cores, .combine=cbind) %dopar% SeqSlotBruteForceForParallel(sequences=sequences, iterations=iterations.per.thread, compute.p.value=compute.p.value, starting.cost=starting.cost, max.random.threshold=max.random.threshold)
 
   stopCluster(clus)
 
+
   #PROCESSING results.foreach
+  ################################
   n.solutions=ncol(results.foreach)
 
   #final solution (we get the first column of the list of lists)
   parallel.slotting.solution=results.foreach[, 1]
+
   # slotting.iterations (sum)
   parallel.slotting.solution$slotting.iterations=sum(unlist(results.foreach["slotting.iterations", ]))
+
   # lowest costs (c and order)
   parallel.slotting.solution$lowest.costs=rev(sort(unlist(results.foreach["lowest.costs", ])))
 
   #select column with lower best.slotting.cost, and from that column, get
   best.slotting.values=unlist(results.foreach["best.slotting.cost", ])
-  best.slotting.column=which(best.slotting.values==min(best.slotting.values))
+
+  #gets the column of the best slotting (or the first one if all values are the same)
+  best.slotting.column=which(best.slotting.values==min(best.slotting.values))[1]
+
   # best.slotting
   parallel.slotting.solution$best.slotting=data.frame(results.foreach["best.slotting", best.slotting.column])
+
   # best slotting.cost
   parallel.slotting.solution$best.slotting.cost=unlist(results.foreach["best.slotting.cost", best.slotting.column])
+
   # psi
   parallel.slotting.solution$psi=unlist(results.foreach["psi", best.slotting.column])
+
   # p.value (sum all p.values)
   parallel.slotting.solution$p.value=sum(unlist(results.foreach["p.value", ]))
 
@@ -96,12 +116,11 @@ SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.va
 
   return(parallel.slotting.solution)
 
-
 }
 
 
 #' @export
-SeqSlotBruteForceForParallel=function(sequences, iterations, compute.p.value, dummy=dummy, starting.cost=starting.cost){
+SeqSlotBruteForceForParallel=function(sequences, iterations, compute.p.value, dummy=dummy, starting.cost=starting.cost, max.random.threshold=max.random.threshold){
 
   #generating a random seed
   set.seed(sample(1:1000, size=1))
@@ -120,7 +139,7 @@ SeqSlotBruteForceForParallel=function(sequences, iterations, compute.p.value, du
   for (i in 1:iterations){
 
     #generating a random walk
-    temp.solution=LeastCostNNRandom(distance.matrix, random.threshold = 0.1)
+    temp.solution=LeastCostNNRandom(distance.matrix, max.random.threshold = max.random.threshold)
 
     #computing the new cost
     new.cost=sum(temp.solution$distances)
@@ -134,7 +153,7 @@ SeqSlotBruteForceForParallel=function(sequences, iterations, compute.p.value, du
   }#end of iteration
 
   #COMPUTING PSI
-  best.solution.cost=best.distances[length(best.distances)]
+  best.solution.cost=(sum(best.solution$distances)*2)+(best.solution[1, "distances"]*2)
   sum.distances.sequences=sum.distances.sequence.A+sum.distances.sequence.B
   psi = (best.solution.cost - sum.distances.sequences) / sum.distances.sequences
 
@@ -163,11 +182,14 @@ SeqSlotBruteForceForParallel=function(sequences, iterations, compute.p.value, du
     best.than=0
 
     #generating random walks
+    #generating random walks
     for (i in 1:iterations){
 
       random.walk=ComputeDistances(distance.matrix, RandomWalk(distance.matrix))
 
-      random.distances[i]=sum(random.walk$distances)
+      if (((sum(random.walk$distances)*2)+(random.walk[1, "distances"]*2)) < lowest.cost){
+        best.than=best.than + 1
+      }
 
     }
 
