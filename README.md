@@ -12,7 +12,7 @@ install.packages("devtools", dep=TRUE)
 library(devtools)
 
 #Installing and loading the package IgnexTaxonomy
-install_github("BlasBenito/IgnexCompare")
+install_github("IGNEX/IgnexCompare")
 library(IgnexCompare)
 
 #Recreating example of the book "Numerical methods in Quaternary pollen analysis" (Birks and Gordon, 1985)
