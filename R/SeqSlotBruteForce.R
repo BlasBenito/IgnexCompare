@@ -57,7 +57,9 @@ SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL
 
   #setting initial value for old cost
   starting.random.walk=LeastCostNNRandom(distance.matrix, max.random.threshold = max.random.threshold)
+  slotting.steps=nrow(starting.random.walk)
   old.cost=sum(starting.random.walk$distances)
+
 
   #message
   cat(paste("Generating", iterations, "slottings. I'll be roasting your CPU for a while, will be back soon..."), sep="\n")
@@ -72,7 +74,7 @@ SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL
 
     #if new.cost is lower or equal than old.cost
     if (new.cost <= old.cost){
-      cat(paste("Lowest cost =", new.cost, sep=" "), sep="\n")
+      cat(paste("Lowest cost =", new.cost/slotting.steps, sep=" "), sep="\n")
       old.cost=new.cost
       best.solution = temp.solution
       best.distances=c(best.distances, old.cost)
