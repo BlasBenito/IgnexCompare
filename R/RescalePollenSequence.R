@@ -40,6 +40,9 @@ RescalePollenSequence=function(sequence, columns=NULL, new.min=NULL, new.max=NUL
     old.min=min(sequence[, column])
     old.max=max(sequence[, column])
 
+    #avoid dividing by 0
+    if (old.max==0){old.max=0.0001}
+
     #scaling
     sequence[, column]=((sequence[, column] - old.min) / (old.max - old.min)) * (new.max - new.min) + new.min
 
