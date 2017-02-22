@@ -109,7 +109,11 @@ SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.va
   parallel.slotting.solution$psi=unlist(results.foreach["psi", best.slotting.column])
 
   # p.value (sum all p.values)
-  parallel.slotting.solution$p.value=sum(unlist(results.foreach["p.value", ]))
+  if (is.na(results.foreach["p.value", 1])){
+    parallel.slotting.solution$p.value=NA
+    } else {
+    parallel.slotting.solution$p.value=sum(unlist(results.foreach["p.value", ]))
+    }
 
   #plot
   PlotSlotting(slotting=parallel.slotting.solution)
