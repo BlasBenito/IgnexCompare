@@ -42,7 +42,7 @@ SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.va
 
   #checking if there is a distance matrix in the input object
   if ("distance.matrix" %not-in% names(sequences)){
-    message("WARNING: I did not found a distance.matrix object in the input list, but I am very nice, and will compute it for you right away (using the Manhattan method)!")
+    # message("WARNING: I did not found a distance.matrix object in the input list, but I am very nice, and will compute it for you right away (using the Manhattan method)!")
     sequences=DistanceMatrix(sequences=sequences, method="manhattan")
   }
 
@@ -68,7 +68,7 @@ SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.va
   #default value for number of cores
   if (is.null(cores)){
     cores=detectCores() - 1
-    cat(paste("The argument 'cores' was not provided, I will use", cores, "cores (all but one!).", sep=" "), sep="\n")
+    # cat(paste("The argument 'cores' was not provided, I will use", cores, "cores (all but one!).", sep=" "), sep="\n")
   }
 
   #initiate cluster
