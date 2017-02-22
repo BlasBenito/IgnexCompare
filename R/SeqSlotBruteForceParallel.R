@@ -106,7 +106,11 @@ SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.va
   parallel.slotting.solution$best.slotting.cost=unlist(results.foreach["best.slotting.cost", best.slotting.column])
 
   # psi
-  parallel.slotting.solution$psi=unlist(results.foreach["psi", best.slotting.column])
+  if (is.na(results.foreach["psi", 1])){
+    parallel.slotting.solution$psi=NA
+  } else {
+    parallel.slotting.solution$psi=unlist(results.foreach["psi", best.slotting.column])
+  }
 
   # p.value (sum all p.values)
   if (is.na(results.foreach["p.value", 1])){
@@ -159,7 +163,11 @@ SeqSlotBruteForceForParallel=function(sequences, iterations, compute.p.value, du
   #COMPUTING PSI
   best.solution.cost=(sum(best.solution$distances)*2)+(best.solution[1, "distances"]*2)
   sum.distances.sequences=sum.distances.sequence.A+sum.distances.sequence.B
-  psi = (best.solution.cost - sum.distances.sequences) / sum.distances.sequences
+  if (sum.distances.sequences != 0 & best.solution.cost !=0){
+    psi = (best.solution.cost - sum.distances.sequences) / sum.distances.sequences
+  } else {
+    psi = NA
+  }
 
   #WRITTING RESULTS
   #############################################################################

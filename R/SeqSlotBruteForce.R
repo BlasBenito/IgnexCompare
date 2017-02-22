@@ -85,7 +85,11 @@ SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL
   #COMPUTING PSI
   best.solution.cost=(sum(best.solution$distances)*2)+(best.solution[1, "distances"]*2)
   sum.distances.sequences=sum.distances.sequence.A+sum.distances.sequence.B
-  psi = (best.solution.cost - sum.distances.sequences) / sum.distances.sequences
+  if (sum.distances.sequences != 0 & best.solution.cost !=0){
+    psi = (best.solution.cost - sum.distances.sequences) / sum.distances.sequences
+  } else {
+    psi = NA
+  }
 
   cat(paste("The psi value is", round(psi, 4), sep=" "), sep="\n")
 
