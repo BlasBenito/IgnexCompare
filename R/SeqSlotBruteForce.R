@@ -15,7 +15,7 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL, max.random.threshold=NULL){
+SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL, max.random.threshold=NULL, plot.title=NULL){
 
   #initial checks
   if (is.null(sequences)){
@@ -37,6 +37,11 @@ SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL
   if (is.null(max.random.threshold)){
     cat("The argument max.random.threshold was set to 0.2.", sep="\n")
     max.random.threshold=0.2
+  }
+
+  #plot title
+  if (is.null(plot.title)){
+    plot.title="Sequence slotting"
   }
 
 
@@ -137,7 +142,7 @@ SeqSlotBruteForce=function(sequences=NULL, iterations=NULL, compute.p.value=NULL
   }#end of COMPUTING P VALUE
 
   #plot
-  PlotSlotting(slotting=sequences)
+  PlotSlotting(slotting=parallel.slotting.solution, main=plot.title)
 
   return(sequences)
 

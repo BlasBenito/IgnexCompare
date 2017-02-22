@@ -16,7 +16,7 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.value=NULL, cores=NULL, max.random.threshold=NULL){
+SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.value=NULL, cores=NULL, max.random.threshold=NULL, plot.title=NULL){
 
   #initial checks
   if (is.null(sequences)){
@@ -45,6 +45,13 @@ SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.va
     message("WARNING: I did not found a distance.matrix object in the input list, but I am very nice, and will compute it for you right away (using the Manhattan method)!")
     sequences=DistanceMatrix(sequences=sequences, method="manhattan")
   }
+
+  #plot title
+  if (is.null(plot.title)){
+    plot.title="Sequence slotting"
+  }
+
+
 
   #getting input data
   distance.matrix=sequences$distance.matrix
@@ -120,7 +127,7 @@ SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.va
     }
 
   #plot
-  PlotSlotting(slotting=parallel.slotting.solution)
+  PlotSlotting(slotting=parallel.slotting.solution, main=plot.title)
 
   return(parallel.slotting.solution)
 
