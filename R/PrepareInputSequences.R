@@ -70,7 +70,7 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
   #TESTING DATASETS
   #####################
   #####################
-  if (silent==TRUE){cat("Checking input datasets...", sep="\n")}
+  if (silent==FALSE){cat("Checking input datasets...", sep="\n")}
 
 
   #CHECKING DATA FORMAT
