@@ -198,6 +198,10 @@ SeqSlotBruteForceForParallel=function(sequences, iterations, compute.p.value, du
 
   }#end of COMPUTING P VALUE
 
+  if (compute.p.value==FALSE){
+    sequences$p.value=NA
+  }
+
   return(sequences)
 
 }
