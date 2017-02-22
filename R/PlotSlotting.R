@@ -17,9 +17,10 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-PlotSlotting=function(slotting=NULL){
+PlotSlotting=function(slotting, main=NULL){
 
   #TO DO: WRITE CHECKS FOR OBJECT NAMES
+  if (is.null(main)){main="Sequence slotting."}
 
   distance.matrix=slotting$distance.matrix
   best.distances=slotting$lowest.costs
@@ -28,9 +29,10 @@ PlotSlotting=function(slotting=NULL){
   p.value=slotting$p.value
 
   #PLOTTING
-  par(mfrow=c(2,1), mar=c(3,4,2,2))
+  par(mfrow=c(2,1), mar=c(3,4,2,2), oma=c(1,1,2,1))
   PlotDistanceMatrix(distance.matrix, main=paste("Best slotting: psi =", round(psi, 2),"; p-value = ", p.value, sep=" "), path=best.solution)
   plot(best.distances, type="l", xlab="Best solutions", ylab="Overall cost", main="Slotting improvement")
+  mtext(main, 3, outer=TRUE, cex=1.5)
 
 }
 
