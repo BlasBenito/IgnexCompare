@@ -140,8 +140,8 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
 
   #HANDLING NA DATA
   #################
-  sequence.A=HandleNACases(sequence=sequence.A, sequence.name=sequence.A.name, if.empty.cases=if.empty.cases)
-  sequence.B=HandleNACases(sequence=sequence.B, sequence.name=sequence.B.name, if.empty.cases=if.empty.cases)
+  sequence.A=HandleNACases(sequence=sequence.A, sequence.name=sequence.A.name, if.empty.cases=if.empty.cases, silent=silent)
+  sequence.B=HandleNACases(sequence=sequence.B, sequence.name=sequence.B.name, if.empty.cases=if.empty.cases, silent=silent)
 
   #counting NAs again for the metadata table
   final.na.sequence.A=sum(is.na(sequence.A))
