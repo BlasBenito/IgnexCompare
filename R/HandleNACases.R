@@ -36,7 +36,7 @@ HandleNACases=function(sequence=NULL, sequence.name=NULL, if.empty.cases=NULL, s
   }
 
   #message
-  if (silent != FALSE){cat(paste("Handling empty and NA cases of the sequence '", sequence.name,"'.", sep=" "), sep="\n")}
+  if (silent == FALSE){cat(paste("Handling empty and NA cases of the sequence '", sequence.name,"'.", sep=" "), sep="\n")}
 
   #identifying empty cases
   empty.cases=is.na(sequence=="")
@@ -53,13 +53,13 @@ HandleNACases=function(sequence=NULL, sequence.name=NULL, if.empty.cases=NULL, s
   sum.na.cases=sum(na.cases)
 
   #message
-  if (silent != FALSE){cat(paste(sum.na.cases, "NA or empty cases were found in", sequence.name, sep=" "), sep="\n")}
+  if (silent == FALSE){cat(paste(sum.na.cases, "NA or empty cases were found in", sequence.name, sep=" "), sep="\n")}
 
 
   #STOP IF NO NA CASES
   if (sum.na.cases==0){
     #message
-    if (silent != FALSE){cat("Nothing to do here, returning original input sequence.", sep="\n")}
+    if (silent == FALSE){cat("Nothing to do here, returning original input sequence.", sep="\n")}
     return(sequence)
   }
 
@@ -70,7 +70,7 @@ HandleNACases=function(sequence=NULL, sequence.name=NULL, if.empty.cases=NULL, s
     #IF if.empty.cases="omit"
     if (if.empty.cases=="omit"){
 
-      if (silent != FALSE){cat(paste("Removing", sum(!complete.cases(sequence)), "rows with NA cases.", sep=" "), sep="\n")}
+      if (silent == FALSE){cat(paste("Removing", sum(!complete.cases(sequence)), "rows with NA cases.", sep=" "), sep="\n")}
 
       #remove rows with NA
       sequence=sequence[complete.cases(sequence), ]
@@ -88,7 +88,7 @@ HandleNACases=function(sequence=NULL, sequence.name=NULL, if.empty.cases=NULL, s
       columns.with.NA=colnames(sequence)[colSums(is.na(sequence)) > 0]
 
       #message
-      if (silent != FALSE){cat(paste("Interpolating", sum.na.cases, "NA cases in", length(columns.with.NA), "columns.", sep=" "), sep="\n")}
+      if (silent == FALSE){cat(paste("Interpolating", sum.na.cases, "NA cases in", length(columns.with.NA), "columns.", sep=" "), sep="\n")}
 
       #iterating through columns with NA to interpolate missing valeus
       for (current.column in 1:length(columns.with.NA)){
@@ -108,7 +108,7 @@ HandleNACases=function(sequence=NULL, sequence.name=NULL, if.empty.cases=NULL, s
       #if NA cases are gone
       if (sum.na.cases==0){
 
-        if (silent != FALSE){cat("All NA cases were interpolated correctly, returning result.", sep="\n")}
+        if (silent == FALSE){cat("All NA cases were interpolated correctly, returning result.", sep="\n")}
         return(sequence)
 
       }
@@ -116,7 +116,7 @@ HandleNACases=function(sequence=NULL, sequence.name=NULL, if.empty.cases=NULL, s
       #if there are still NA cases
       if (sum.na.cases>0){
 
-        if (silent != FALSE){cat(paste(sum.na.cases, "were not interpolated correctly, removing", sum(!complete.cases(sequence)), "rows containing these cases.", sep=" "), sep="\n")}
+        if (silent == FALSE){cat(paste(sum.na.cases, "were not interpolated correctly, removing", sum(!complete.cases(sequence)), "rows containing these cases.", sep=" "), sep="\n")}
 
         sequence=sequence[complete.cases(sequence), ]
 

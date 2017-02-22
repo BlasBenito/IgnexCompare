@@ -119,7 +119,7 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
 
 
   #messages
-  if (silent != FALSE){
+  if (silent == FALSE){
     if (length(removed.column.names.sequence.A)==1){
       message(paste("WARNING: the column", removed.column.names.sequence.A, "was removed from the sequence A.", sep=" "))
     }
