@@ -19,7 +19,7 @@
 #' @examples
 #' data(InputDataExample)
 #' @export
-PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B=NULL, sequence.B.name=NULL, if.empty.cases=NULL, output.type=NULL){
+PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B=NULL, sequence.B.name=NULL, if.empty.cases=NULL, output.type=NULL, silent=NULL){
 
   #OUTPUT TYPES
   # "rescaled"
@@ -27,6 +27,9 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
   # "percentage"
   # "rescaled-proportion"
   # "rescaled-percentage"
+
+  #SILENT?
+  if (is.null(silent)){silent=FALSE}
 
   #CHECKING INPUT DATA
   #defining the default value for fuzzy match
@@ -67,7 +70,7 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
   #TESTING DATASETS
   #####################
   #####################
-  cat("Checking input datasets...", sep="\n")
+  if (silent==TRUE){cat("Checking input datasets...", sep="\n")}
 
 
   #CHECKING DATA FORMAT
@@ -114,21 +117,24 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
   sequence.A=sequence.A[, common.column.names]
   sequence.B=sequence.B[, common.column.names]
 
+
   #messages
-  if (length(removed.column.names.sequence.A)==1){
-    message(paste("WARNING: the column", removed.column.names.sequence.A, "was removed from the sequence A.", sep=" "))
-  }
+  if (silent != FALSE){
+    if (length(removed.column.names.sequence.A)==1){
+      message(paste("WARNING: the column", removed.column.names.sequence.A, "was removed from the sequence A.", sep=" "))
+    }
 
-  if (length(removed.column.names.sequence.A)>1){
-    message(paste("WARNING: the columns", removed.column.names.sequence.A, "were removed from the sequence A.", sep=" "))
-  }
+    if (length(removed.column.names.sequence.A)>1){
+      message(paste("WARNING: the columns", removed.column.names.sequence.A, "were removed from the sequence A.", sep=" "))
+    }
 
-  if (length(removed.column.names.sequence.B)==1){
-    message(paste("WARNING: the column", removed.column.names.sequence.B, "was removed from the sequence B.", sep=" "))
-  }
+    if (length(removed.column.names.sequence.B)==1){
+      message(paste("WARNING: the column", removed.column.names.sequence.B, "was removed from the sequence B.", sep=" "))
+    }
 
-  if (length(removed.column.names.sequence.B)>1){
-    message(paste("WARNING: the columns", removed.column.names.sequence.B, "were removed from the sequence B.", sep=" "))
+    if (length(removed.column.names.sequence.B)>1){
+      message(paste("WARNING: the columns", removed.column.names.sequence.B, "were removed from the sequence B.", sep=" "))
+    }
   }
 
 
