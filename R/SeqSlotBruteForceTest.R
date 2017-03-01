@@ -15,7 +15,7 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-SeqSlotBruteForce=function(sequences=NULL, convergence.criteria=NULL, compute.p.value=NULL, max.random.threshold=NULL, plot.title=NULL){
+SeqSlotBruteForceTest=function(sequences=NULL, convergence.criteria=NULL, compute.p.value=NULL, max.random.threshold=NULL, plot.title=NULL){
 
   p.value.iterations=10000
 

@@ -16,7 +16,7 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-SeqSlotBruteForceParallel=function(sequences=NULL, convergence.criteria=NULL, compute.p.value=NULL, cores=NULL, max.random.threshold=NULL, plot.title=NULL){
+SeqSlotBruteForceParallelTest=function(sequences=NULL, convergence.criteria=NULL, compute.p.value=NULL, cores=NULL, max.random.threshold=NULL, plot.title=NULL){
 
   #libraries
   require(foreach)

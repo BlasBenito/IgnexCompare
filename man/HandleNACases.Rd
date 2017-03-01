@@ -5,7 +5,7 @@
 \title{Prepare input sequences.}
 \usage{
 HandleNACases(sequence = NULL, sequence.name = NULL,
-  if.empty.cases = NULL)
+  if.empty.cases = NULL, silent = NULL)
 }
 \arguments{
 \item{sequence}{A dataframe containing pollen data. This sequence will be compared with and adapted to the structure of sequence.A}

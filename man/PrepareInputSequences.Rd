@@ -6,7 +6,7 @@
 \usage{
 PrepareInputSequences(sequence.A = NULL, sequence.A.name = NULL,
   sequence.B = NULL, sequence.B.name = NULL, if.empty.cases = NULL,
-  rescale = NULL)
+  output.type = NULL, silent = NULL)
 }
 \arguments{
 \item{sequence.A}{A dataframe containing pollen counts or percentages. This sequence will be used as reference. It will be checked for empty cases.}
