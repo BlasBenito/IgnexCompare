@@ -124,9 +124,6 @@ SeqSlotBruteForceParallelTest=function(sequences=NULL, convergence.criteria=NULL
     parallel.slotting.solution$p.value=sum(unlist(results.foreach["p.value", ]))
     }
 
-  #plot
-  PlotSlotting(slotting=parallel.slotting.solution, main=plot.title)
-
   return(parallel.slotting.solution)
 
 }

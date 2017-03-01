@@ -147,9 +147,6 @@ SeqSlotBruteForceTest=function(sequences=NULL, convergence.criteria=NULL, comput
 
   }#end of COMPUTING P VALUE
 
-  #plot
-  PlotSlotting(slotting=parallel.slotting.solution, main=plot.title)
-
   return(sequences)
 
 }
