@@ -32,12 +32,14 @@ PlotDistanceMatrix(sequences$distance.matrix, main="Manhattan distance")
 
 #Compute best slotting using a naive brute force approach
 slotting=SeqSlotBruteForce(sequences=sequences, iterations=10000, compute.p.value=TRUE, max.random.threshold=0.5)
+PlotSlotting(slotting)
 slotting$psi #better than the one in the book, the original slotting was wrong.
 
 #Compute best slotting using a parallelized naive brute force approach (for big datasets).
 #Requires the pacakges foreach, parallel, and doParallel
 slotting.parallel=SeqSlotBruteForceParallel(sequences=sequences, iterations=10000, compute.p.value=TRUE, max.random.threshold = 0.5)
-slotting$psi
+PlotSlotting(slotting.parallel)
+slotting.parallel$psi
 
 #Comparing the performance of the paralellized and serialized versions of the algorithm
 install.packages("microbenchmark")
