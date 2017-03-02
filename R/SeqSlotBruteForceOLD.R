@@ -15,12 +15,17 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-SeqSlotBruteForceTest=function(sequences=NULL, compute.p.value=NULL, max.random.threshold=NULL){
+SeqSlotBruteForceOLD=function(sequences=NULL, iterations=NULL, compute.p.value=NULL, max.random.threshold=NULL, plot.title=NULL){
 
   #initial checks
   if (is.null(sequences)){
     stop("WOOOSH! No input file provided, aborting.")
     }
+
+  if (is.null(iterations)){
+    cat("Iterations argument was not provided, using default value (500000).", sep="\n")
+    iterations=10000
+  }
 
   #initial checks
   if (is.null(compute.p.value)){
@@ -34,16 +39,17 @@ SeqSlotBruteForceTest=function(sequences=NULL, compute.p.value=NULL, max.random.
     max.random.threshold=0.2
   }
 
+  #plot title
+  if (is.null(plot.title)){
+    plot.title="Sequence slotting"
+  }
+
 
   #checking if there is a distance matrix in the input object
   if ("distance.matrix" %not-in% names(sequences)){
-    #message
-    cat("Computing distance matrix...", sep="\n")
+    message("WARNING: I did not found a distance.matrix object in the input list, but I am very nice, and will compute it for you right away (using the Manhattan method)!")
     sequences=DistanceMatrix(sequences=sequences, method="manhattan")
   }
-
-  #computing convergence criteria (minimum number of times a solution has to be found to be valid).
-  convergence.criterion=nrow(sequences$sequence.A)*nrow(sequences$sequence.B)*100
 
   #extracting objects from the input list
   distance.matrix=sequences$distance.matrix
@@ -51,63 +57,35 @@ SeqSlotBruteForceTest=function(sequences=NULL, compute.p.value=NULL, max.random.
   sum.distances.sequence.B=sequences$sum.distances.sequence.B
 
   #results objects
-  best.costs=vector()
+  best.distances=vector()
   best.solution=data.frame()
 
-  #setting initial value for best.distances
+  #setting initial value for old cost
   starting.random.walk=LeastCostNNRandom(distance.matrix, max.random.threshold = max.random.threshold)
   slotting.steps=nrow(starting.random.walk)
-  best.costs=c(best.costs, sum(starting.random.walk$distances))
+  old.cost=sum(starting.random.walk$distances)
 
-  #starting convergence
-  convergence=0
 
   #message
-  cat("Computing optimal slotting...", sep="\n")
-
-  iterations.to.convergence=0
-  iterations=0
+  cat(paste("Generating", iterations, "slottings. I'll be roasting your CPU for a while, will be back soon..."), sep="\n")
 
   #iterating
-  repeat {
-
-    iterations.to.convergence=iterations.to.convergence+1
-    iterations=iterations+1
-
+  for (i in 1:iterations){
     #generating a random walk
     temp.solution=LeastCostNNRandom(distance.matrix, max.random.threshold = max.random.threshold)
 
     #computing the new cost
     new.cost=sum(temp.solution$distances)
 
-      #new cost lower than the last cost added to best.distances
-      if (new.cost <= best.costs[length(best.costs)]){
-
-        cat(paste("New solution found - cost = ", round(new.cost/slotting.steps, 3), "; iterations = ", iterations, "; random threshold = ", max.random.threshold, sep=" "), sep="\n")
-
-        #resetting convergence
-        iterations.to.convergence=0
-
-        #diminishing max.random.threshold
-        max.random.threshold = max.random.threshold - 0.01
-
-        #storing solution
-        best.solution=temp.solution
-
-        #storing cost
-        best.costs=c(best.costs, new.cost)
-
-      }
-
-    if (iterations.to.convergence >= convergence.criterion){
-      cat(paste(iterations.to.convergence, "iterations without finding a better solution. I'm done!", sep=" "), sep="\n")
-      break
+    #if new.cost is lower or equal than old.cost
+    if (new.cost <= old.cost){
+      cat(paste("Lowest cost =", new.cost/slotting.steps, sep=" "), sep="\n")
+      old.cost=new.cost
+      best.solution = temp.solution
+      best.distances=c(best.distances, old.cost)
     }
-
-  }#end of while
-
-  #message
-  cat("Sequence slotting done!", sep="\n")
+  }#end of iteration
+  cat("Done!", sep="\n")
 
   #COMPUTING PSI
   best.solution.cost=(sum(best.solution$distances)*2)+(best.solution[1, "distances"]*2)
@@ -118,23 +96,20 @@ SeqSlotBruteForceTest=function(sequences=NULL, compute.p.value=NULL, max.random.
     psi = NA
   }
 
-  cat(paste("Psi value =", round(psi, 4), sep=" "), sep="\n")
-
-  #NORMALIZING BEST DISTANCES BY THE NUMBER OF SLOTTING STEPS
-  best.costs=best.costs/slotting.steps
+  cat(paste("The psi value is", round(psi, 4), sep=" "), sep="\n")
 
   #WRITING RESULTS
   #####################################################################
   previous.names=names(sequences)
 
   sequences[[9]]=iterations
-  sequences[[10]]=best.costs
+  sequences[[10]]=best.distances
   sequences[[11]]=best.solution
-  sequences[[12]]=min(best.costs)[1]
+  sequences[[12]]=best.solution.cost
   sequences[[13]]=psi
   sequences[[14]]="Not computed"
 
-  names(sequences)=c(previous.names, "iterations", "lowest.costs", "best.slotting", "best.slotting.cost", "psi", "p.value")
+  names(sequences)=c(previous.names, "slotting.iterations", "lowest.costs", "best.slotting", "best.slotting.cost", "psi", "p.value")
 
   #COMPUTING PVALUE
   #################
@@ -162,11 +137,12 @@ SeqSlotBruteForceTest=function(sequences=NULL, compute.p.value=NULL, max.random.
     #p-value
     sequences$p.value=best.than/iterations
 
-    cat(paste("P-value =", sequences$p.value, sep=" "), sep="\n")
+    cat(paste("Done! p-value =", sequences$p.value, sep=" "), sep="\n")
 
   }#end of COMPUTING P VALUE
 
-  cat("I am done!", sep="\n")
+  #plot
+  PlotSlotting(slotting=parallel.slotting.solution, main=plot.title)
 
   return(sequences)
 

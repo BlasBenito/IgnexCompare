@@ -14,12 +14,7 @@
 #' @export
 LeastCostNNRandom=function(distance.matrix, max.random.threshold=NULL){
 
-  if (max.random.threshold <= 0 | max.random.threshold > 1){
-    stop("The argument max.random.threshold should be in the interval (0, 1].")
-  }
-
-  if(is.null(max.random.threshold)){max.random.threshold=0.2}
-
+  #starting values for the search
   current.col=1
   current.row=1
   last.col=ncol(distance.matrix)
@@ -28,25 +23,29 @@ LeastCostNNRandom=function(distance.matrix, max.random.threshold=NULL){
   path.cols=vector()
   path.rows[1]=current.row
   path.cols[1]=current.col
-  random.threshold=runif(1, 0, max.random.threshold)
+  # random.threshold=runif(1, 0, max.random.threshold)
+  random.threshold=max.random.threshold
 
+  #searching
   repeat{
 
-    #random number
-    random=runif(1)
-
     #random move or targeted move?
-    if (random > random.threshold){
+    if (runif(1) > random.threshold){
 
       #TARGETED
 
-      #selecting cell with lower value
+      #while we are not done...
       if (current.row < last.row & current.col < last.col){
+
+        #move to neighboring cell with the lower distance value
         if (distance.matrix[current.row+1, current.col] < distance.matrix[current.row, current.col+1])
+
+        #defining move to do
         {move=c(1,0)} else {move=c(0,1)}
+
       }
 
-      #filter values if bounds are reached
+      #change move if bounds are reached
       if (current.row == last.row & current.col < last.col){move=c(0,1)}
       if (current.col == last.col & current.row < last.row){move=c(1,0)}
 

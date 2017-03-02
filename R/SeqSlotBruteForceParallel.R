@@ -16,17 +16,26 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.value=NULL, cores=NULL, max.random.threshold=NULL, plot.title=NULL){
+SeqSlotBruteForceParallel=function(sequences=NULL, compute.p.value=NULL, cores=NULL, max.random.threshold=NULL){
+
+  #libraries
+  require(foreach)
+  require(parallel)
+  require(doParallel)
 
   #initial checks
   if (is.null(sequences)){
     stop("WOOOSH! No input data provided, aborting.")
   }
 
-  if (is.null(iterations)){
-    cat("Iterations argument was not provided, using default value (500000).", sep="\n")
-    iterations=500000
+  #default value for number of cores
+  if (is.null(cores)){
+    cores=detectCores() - 1
   }
+
+  #computing convergence criteria (minimum number of times a solution has to be found to be valid).
+  convergence.criterion=nrow(sequences$sequence.A)*nrow(sequences$sequence.B)*100
+  convergence.criterion=convergence.criterion/cores
 
   #initial checks
   if (is.null(compute.p.value)){
@@ -36,22 +45,13 @@ SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.va
 
   #initial checks
   if (is.null(max.random.threshold)){
-    cat("The argument max.random.threshold was set to 0.2.", sep="\n")
     max.random.threshold=0.2
   }
 
   #checking if there is a distance matrix in the input object
   if ("distance.matrix" %not-in% names(sequences)){
-    # message("WARNING: I did not found a distance.matrix object in the input list, but I am very nice, and will compute it for you right away (using the Manhattan method)!")
     sequences=DistanceMatrix(sequences=sequences, method="manhattan")
   }
-
-  #plot title
-  if (is.null(plot.title)){
-    plot.title="Sequence slotting"
-  }
-
-
 
   #getting input data
   distance.matrix=sequences$distance.matrix
@@ -59,30 +59,17 @@ SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.va
   #setting initial value for old cost
   starting.random.walk=LeastCostNNRandom(distance.matrix, max.random.threshold = max.random.threshold)
   starting.cost=sum(starting.random.walk$distances)
-
-  #libraries
-  library(foreach)
-  library(parallel)
-  library(doParallel)
-
-  #default value for number of cores
-  if (is.null(cores)){
-    cores=detectCores() - 1
-    # cat(paste("The argument 'cores' was not provided, I will use", cores, "cores (all but one!).", sep=" "), sep="\n")
-  }
+  slotting.steps=nrow(starting.random.walk)
 
   #initiate cluster
   clus=makeCluster(cores)
   registerDoParallel(clus)
 
   #exporting cluster variables
-  clusterExport(cl=clus, varlist=c('SeqSlotBruteForceForParallel', 'LeastCostNNRandom', 'ComputeDistances', 'RandomWalk'), envir=environment())
-
-  #iterations per thread
-  iterations.per.thread=round(iterations/cores, 0)
+  clusterExport(cl=clus, varlist=c('SeqSlotBruteForceForParallel', 'LeastCostNNRandom', 'ComputeDistances', 'RandomWalk', 'convergence.criterion'), envir=environment())
 
   #parallel execution of SinglePollenTypeToSpecies
-  results.foreach=foreach(dummy=1:cores, .combine=cbind) %dopar% SeqSlotBruteForceForParallel(sequences=sequences, iterations=iterations.per.thread, compute.p.value=compute.p.value, starting.cost=starting.cost, max.random.threshold=max.random.threshold)
+  results.foreach=foreach(dummy=1:cores, .combine=cbind) %dopar% SeqSlotBruteForceForParallel(sequences=sequences, iterations.to.convergence=iterations.to.convergence, compute.p.value=compute.p.value, starting.cost=starting.cost, max.random.threshold=max.random.threshold, slotting.steps=slotting.steps)
 
   stopCluster(clus)
 
@@ -95,7 +82,7 @@ SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.va
   parallel.slotting.solution=results.foreach[, 1]
 
   # slotting.iterations (sum)
-  parallel.slotting.solution$slotting.iterations=sum(unlist(results.foreach["slotting.iterations", ]))
+  parallel.slotting.solution$convergence.criteria=sum(unlist(results.foreach["iterations", ]))
 
   # lowest costs (c and order)
   parallel.slotting.solution$lowest.costs=rev(sort(unlist(results.foreach["lowest.costs", ])))
@@ -126,16 +113,13 @@ SeqSlotBruteForceParallel=function(sequences=NULL, iterations=NULL, compute.p.va
     parallel.slotting.solution$p.value=sum(unlist(results.foreach["p.value", ]))
     }
 
-  #plot
-  PlotSlotting(slotting=parallel.slotting.solution, main=plot.title)
-
   return(parallel.slotting.solution)
 
 }
 
 
 #' @export
-SeqSlotBruteForceForParallel=function(sequences, iterations, compute.p.value, dummy=dummy, starting.cost=starting.cost, max.random.threshold=max.random.threshold){
+SeqSlotBruteForceForParallel=function(sequences, iterations.to.convergence, compute.p.value, dummy=dummy, starting.cost=starting.cost, max.random.threshold=max.random.threshold, slotting.steps=slotting.steps){
 
   #generating a random seed
   set.seed(sample(1:1000, size=1))
@@ -146,12 +130,20 @@ SeqSlotBruteForceForParallel=function(sequences, iterations, compute.p.value, du
   sum.distances.sequence.B=sequences$sum.distances.sequence.B
 
   #results objects
-  best.distances=vector()
+  best.costs=vector()
   best.solution=data.frame()
-  old.cost=starting.cost
+  best.costs=c(best.costs, starting.cost)
+
+  #starting convergence
+  iterations.to.convergence=0
+  convergence=0
+  iterations=0
 
   #iterating
-  for (i in 1:iterations){
+  repeat {
+
+    iterations.to.convergence=iterations.to.convergence+1
+    iterations=iterations+1
 
     #generating a random walk
     temp.solution=LeastCostNNRandom(distance.matrix, max.random.threshold = max.random.threshold)
@@ -159,13 +151,32 @@ SeqSlotBruteForceForParallel=function(sequences, iterations, compute.p.value, du
     #computing the new cost
     new.cost=sum(temp.solution$distances)
 
-    #if new.cost is lower or equal than old.cost
-    if (new.cost <= old.cost){
-      old.cost=new.cost
+    #new cost lower than the last cost added to best.distances
+    if (new.cost <= best.costs[length(best.costs)]){
+
+      cat(paste("New solution found - cost = ", round(new.cost/slotting.steps, 3), "; iterations = ", iterations, "; random threshold = ", max.random.threshold, sep=" "), sep="\n")
+
+      #resetting convergence
+      iterations.to.convergence=0
+
+      #diminishing max.random.threshold
+      max.random.threshold = max.random.threshold - 0.01
+
+      #storing solution
       best.solution=temp.solution
-      best.distances=c(best.distances, old.cost)
+
+      #storing cost
+      best.costs=c(best.costs, new.cost)
+
     }
-  }#end of iteration
+
+    if (iterations.to.convergence >= convergence.criterion){
+      cat(paste(iterations.to.convergence, "iterations without finding a better solution. I'm done!", sep=" "), sep="\n")
+      break
+    }
+
+  }#end of while
+
 
   #COMPUTING PSI
   best.solution.cost=(sum(best.solution$distances)*2)+(best.solution[1, "distances"]*2)
@@ -176,17 +187,20 @@ SeqSlotBruteForceForParallel=function(sequences, iterations, compute.p.value, du
     psi = NA
   }
 
+  #NORMALIZING BEST DISTANCES BY THE NUMBER OF SLOTTING STEPS
+  best.costs=best.costs/slotting.steps
+
   #WRITTING RESULTS
   #############################################################################
   previous.names=names(sequences)
   sequences[[9]]=iterations
-  sequences[[10]]=best.distances
+  sequences[[10]]=best.costs
   sequences[[11]]=best.solution
-  sequences[[12]]=best.solution.cost
+  sequences[[12]]=min(best.costs)[1]
   sequences[[13]]=psi
   sequences[[14]]="Not computed"
 
-  names(sequences)=c(previous.names, "slotting.iterations", "lowest.costs", "best.slotting", "best.slotting.cost", "psi", "p.value")
+  names(sequences)=c(previous.names, "iterations", "lowest.costs", "best.slotting", "best.slotting.cost", "psi", "p.value")
 
   #COMPUTING PVALUE
   #################
@@ -200,7 +214,6 @@ SeqSlotBruteForceForParallel=function(sequences, iterations, compute.p.value, du
     #counting results better than best solution
     best.than=0
 
-    #generating random walks
     #generating random walks
     for (i in 1:iterations){
 

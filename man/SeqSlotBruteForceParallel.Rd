@@ -9,11 +9,11 @@
 \arguments{
 \item{sequences}{A list produced by the function \emph{PrepareInputSequences} or \emph{DistanceMatrix}}
 
-\item{iterations}{Number of iterations (Default value is 10000).}
-
 \item{compute.p.value}{Logical value (TRUE or FALSE). Set to TRUE to compute a p-value based on a permutation test.}
 
 \item{max.random.threshold}{Number in the interval [0, 1], determining the proportion of the steps defined by chance during the search for the best slotting solution.}
+
+\item{iterations}{Number of iterations (Default value is 10000).}
 }
 \description{
 It takes as inputs two pollen sequences produced by the function \emph{PrepareInputSequences}, and computes the best slotting.

@@ -31,7 +31,7 @@ PlotSlotting=function(slotting, main=NULL){
   #PLOTTING
   par(mfrow=c(2,1), mar=c(3,4,2,2), oma=c(1,1,2,1))
   PlotDistanceMatrix(distance.matrix, main=paste("Best slotting: psi =", round(psi, 2),"; p-value = ", p.value, sep=" "), path=best.solution)
-  plot(best.distances, type="l", xlab="Best solutions", ylab="Overall cost", main="Slotting improvement")
+  plot(best.distances, type="l", xlab="Best solutions", ylab="Overall cost", main="Slotting improvement", lwd=2, col="red4")
   mtext(main, 3, outer=TRUE, cex=1.5)
 
 }
