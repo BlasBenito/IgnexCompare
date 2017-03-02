@@ -14,6 +14,9 @@
 #' @export
 LeastCostNNRandom=function(distance.matrix, max.random.threshold=NULL){
 
+  if (is.null(max.random.threshold)){max.random.threshold=0.2}
+  if (max.random.threshold < 0){max.random.threshold=0}
+
   #starting values for the search
   current.col=1
   current.row=1
