@@ -31,29 +31,12 @@ sequences=DistanceMatrix(sequences=sequences, method="manhattan")
 PlotDistanceMatrix(sequences$distance.matrix, main="Manhattan distance")
 
 #Compute best slotting using a naive brute force approach
-slotting=SeqSlotBruteForce(sequences=sequences, iterations=10000, compute.p.value=TRUE, max.random.threshold=0.5)
+slotting=SeqSlotBruteForce(sequences=sequences, compute.p.value=TRUE, max.random.threshold=0.2)
 PlotSlotting(slotting)
 slotting$psi #better than the one in the book, the original slotting was wrong.
 
 #Compute best slotting using a parallelized naive brute force approach (for big datasets).
 #Requires the pacakges foreach, parallel, and doParallel
-slotting.parallel=SeqSlotBruteForceParallel(sequences=sequences, iterations=10000, compute.p.value=TRUE, max.random.threshold = 0.5)
+slotting.parallel=SeqSlotBruteForceParallel(sequences=sequences, compute.p.value=TRUE, max.random.threshold = 0.2)
 PlotSlotting(slotting.parallel)
 slotting.parallel$psi
-
-#Comparing the performance of the paralellized and serialized versions of the algorithm
-install.packages("microbenchmark")
-library(microbenchmark)
-
-#serialized version
-microbenchmark(SeqSlotBruteForce(sequences=sequences, iterations=10000, compute.p.value=TRUE, max.random.threshold=0.5), times=15)
-#      min      lq    mean   median       uq      max neval
-# 9.151024 9.36894 9.63988 9.582095 9.818076 10.18756    15
-
-#parallel version
-microbenchmark(SeqSlotBruteForceParallel(sequences=sequences, iterations=10000, compute.p.value=TRUE, max.random.threshold = 0.5), times=15)
-#      min       lq     mean   median       uq      max neval
-# 2.824353 2.874306 2.953351 2.933804 3.016951 3.106423    15
-#NOTE: The advantage of the parallel version gains importance with increased sizes of the parameter iterations. For 100000 iterations, the average execution time was 90 vs 18 seconds.
-```
-
