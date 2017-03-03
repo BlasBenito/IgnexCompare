@@ -40,3 +40,6 @@ slotting$psi #better than the one in the book, the original slotting was wrong.
 slotting.parallel=SeqSlotBruteForceParallel(sequences=sequences, compute.p.value=TRUE, max.random.threshold = 0.2)
 PlotSlotting(slotting.parallel)
 slotting.parallel$psi
+
+#Compute best slotting using the classic algorithm. WAYYY MORE efficient, but the plotting of the best path and the best slotting are not provided (yet?). Only provides a psi value.
+slotting.classic=SeqSlotClassic(sequences=sequences)
