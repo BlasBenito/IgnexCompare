@@ -21,7 +21,6 @@ SeqSlotClassic=function(sequences){
   #checking if there is a distance matrix in the input object
   if ("distance.matrix" %not-in% names(sequences)){
     #message
-    cat("Computing distance matrix...", sep="\n")
     sequences=DistanceMatrix(sequences=sequences, method="manhattan")
   }
 
