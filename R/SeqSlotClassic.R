@@ -70,7 +70,7 @@ SeqSlotClassic=function(sequences){
   sum.distances.sequences=sum.distances.sequence.A+sum.distances.sequence.B
   if (sum.distances.sequences != 0 & solution.cost !=0){
     psi = (solution.cost - sum.distances.sequences) / sum.distances.sequences
-    if (psi < 0){psi=0}
+    if (psi < 0.0001){psi=0}
   } else {
     psi = NA
   }
