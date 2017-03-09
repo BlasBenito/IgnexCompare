@@ -28,8 +28,8 @@ SeqSlotEqualSampleSize=function(sequences, psi.mode="classic"){
   cost=sequences$distance.matrix
 
   #what sequence is longer?
-  sequence.A.nrow=nrow(sequences$sequence.A)
-  sequence.B.nrow=nrow(sequences$sequence.B)
+  sequence.A.nrow=nrow(sequences[["sequence.A"]])
+  sequence.B.nrow=nrow(sequences[["sequence.B"]])
 
   #defining small and big sequence
   if (sequence.A.nrow > sequence.B.nrow){
@@ -40,6 +40,17 @@ SeqSlotEqualSampleSize=function(sequences, psi.mode="classic"){
   if (sequence.A.nrow < sequence.B.nrow){
     small.sequence.name="sequence.A"
     big.sequence.name="sequence.B"
+  }
+
+  #computing number of samples to draw
+  # samples=sqrt(choose(big.sequence.nrow, small.sequence.nrow))
+  samples=1000
+
+  #if the sequences have the same size
+  if (sequence.A.nrow == sequence.B.nrow){
+    small.sequence.name="sequence.A"
+    big.sequence.name="sequence.B"
+    samples=1
   }
 
 
@@ -56,16 +67,7 @@ SeqSlotEqualSampleSize=function(sequences, psi.mode="classic"){
   }
   small.sequence.autosum=sum(small.sequence.autosum)
 
-  #computing number of samples to draw
-  # samples=sqrt(choose(big.sequence.nrow, small.sequence.nrow))
-  samples=1000
 
-  #if the sequences have the same size
-  if (sequence.A.nrow == sequence.B.nrow){
-    small.sequence.name="sequence.A"
-    big.sequence.name="sequence.B"
-    samples=1
-  }
 
   #vector to store results
   psi.values=vector()
