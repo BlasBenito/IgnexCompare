@@ -81,7 +81,7 @@ SeqSlotClassic=function(sequences, psi.mode=NULL){
       }
   }
 
-  if (psi.mode="modern"){
+  if (psi.mode=="modern"){
     psi=solution/((cost.rows+cost.columns)-1)
   }
 
