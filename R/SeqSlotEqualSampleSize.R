@@ -60,6 +60,13 @@ SeqSlotEqualSampleSize=function(sequences, psi.mode="classic"){
   # samples=sqrt(choose(big.sequence.nrow, small.sequence.nrow))
   samples=1000
 
+  #if the sequences have the same size
+  if (sequence.A.nrow == sequence.B.nrow){
+    small.sequence.name="sequence.A"
+    big.sequence.name="sequence.B"
+    samples=1
+  }
+
   #vector to store results
   psi.values=vector()
 
