@@ -135,7 +135,9 @@ SeqSlotEqualSampleSize=function(sequences, psi.mode="classic"){
 
     #COMPUTING PSI
     if (psi.mode=="classic"){
+
       solution.cost=(solution*2)+(cost.temp[1,1]*2)
+
       sum.distances.sequences=big.sequence.autosum+small.sequence.autosum
 
       if (sum.distances.sequences != 0 & solution.cost != 0){
@@ -154,7 +156,7 @@ SeqSlotEqualSampleSize=function(sequences, psi.mode="classic"){
     }
 
     if (psi.mode=="modern"){
-      psi=solution/((cost.temp.rows+cost.temp.columns)-1)
+      psi=solution/((small.sequence.nrow+small.sequence.nrow)-1)
     }
     ######################################################################
 
