@@ -61,7 +61,7 @@ SeqSlotClassic=function(sequences, psi.mode=NULL){
       next.column=column+1
 
       #value of the next cell
-      cumulative.cost[next.row, next.column] = min(cumulative.cost[next.row, next.column], cumulative.cost[next.row, column]) + cost[next.row, next.column]
+      cumulative.cost[next.row, next.column] = min(cumulative.cost[row, next.column], cumulative.cost[next.row, column]) + cost[next.row, next.column]
 
     }
   }
@@ -81,13 +81,12 @@ SeqSlotClassic=function(sequences, psi.mode=NULL){
       }
   }
 
-  if (psi.mode=="modern"){
+  if (psi.mode="modern"){
     psi=solution/((cost.rows+cost.columns)-1)
   }
 
   #printing result
   cat(paste("Psi value =", round(psi, 4), sep=" "), sep="\n")
-
 
   #WRITING RESULTS (for compatibility with the other seqslot functions)
   #####################################################################
