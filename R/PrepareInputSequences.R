@@ -47,11 +47,11 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
 
   #data not provided
   if (is.null(sequence.A)){
-    stop("FATAL ERROR: reference sequence was not provided.")
+    stop("ERROR: reference sequence was not provided.")
   }
 
   if (is.null(sequence.B)){
-    stop("FATAL ERROR: target sequence was not provided.")
+    stop("ERROR: target sequence was not provided.")
   }
 
   #data not provided

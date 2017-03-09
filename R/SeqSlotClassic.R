@@ -11,7 +11,11 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-SeqSlotClassic=function(sequences){
+SeqSlotClassic=function(sequences, psi.mode=NULL){
+
+  if(is.null(psi.mode)){
+    psi.mode="classic"
+  }
 
   #initial checks
   if (is.null(sequences)){
@@ -57,7 +61,7 @@ SeqSlotClassic=function(sequences){
       next.column=column+1
 
       #value of the next cell
-      cumulative.cost[next.row, next.column] = min(cumulative.cost[row, next.column], cumulative.cost[next.row, column]) + cost[next.row, next.column]
+      cumulative.cost[next.row, next.column] = min(cumulative.cost[next.row, next.column], cumulative.cost[next.row, column]) + cost[next.row, next.column]
 
     }
   }
@@ -66,17 +70,24 @@ SeqSlotClassic=function(sequences){
   solution=cumulative.cost[cost.rows, cost.columns]
 
   #COMPUTING PSI
-  solution.cost=(solution*2)+(cost[1,1]*2)
-  sum.distances.sequences=sum.distances.sequence.A+sum.distances.sequence.B
-  if (sum.distances.sequences != 0 & solution.cost !=0){
-    psi = (solution.cost - sum.distances.sequences) / sum.distances.sequences
-    if (psi < 0.0001){psi=0}
-  } else {
-    psi = NA
+  if (psi.mode=="classic"){
+    solution.cost=(solution*2)+(cost[1,1]*2)
+      sum.distances.sequences=sum.distances.sequence.A+sum.distances.sequence.B
+      if (sum.distances.sequences != 0 & solution.cost !=0){
+        psi = (solution.cost - sum.distances.sequences) / sum.distances.sequences
+        if (psi < 0.0001){psi=0}
+      } else {
+        psi = NA
+      }
+  }
+
+  if (psi.mode="modern"){
+    psi=solution/((cost.rows+cost.columns)-1)
   }
 
   #printing result
   cat(paste("Psi value =", round(psi, 4), sep=" "), sep="\n")
+
 
   #WRITING RESULTS (for compatibility with the other seqslot functions)
   #####################################################################
