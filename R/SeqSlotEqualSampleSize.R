@@ -94,7 +94,7 @@ SeqSlotEqualSampleSize=function(sequences, psi.mode="classic"){
     #computing autosum of big sequence
     big.sequence.autosum=vector()
     for (i in 1:(big.sequence.nrow-1)){
-      big.sequence.autosum[i]=ManhattanDistance(big.sequence.data[i, ], big.sequence.data[i+1, ])
+      big.sequence.autosum[i]=ManhattanDistance(big.sequence.temp[i, ], big.sequence.temp[i+1, ])
     }
     big.sequence.autosum=sum(big.sequence.autosum)
 
