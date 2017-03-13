@@ -76,11 +76,11 @@ DistanceMatrix=function(sequences, method=NULL){
   #computing manhattan distance
   if (method=="hellinger"){
     for (i in 1:nrow.sequence.A-1){
-      distances.sequence.A[i]=.HellingerDistance(sequence.A[i], sequence.A[i+1])
+      distances.sequence.A[i]=HellingerDistance(sequence.A[i], sequence.A[i+1])
     }
 
     for (j in 1:nrow.sequence.B-1){
-      distances.sequence.B[j]=.HellingerDistance(sequence.B[j], sequence.B[j+1])
+      distances.sequence.B[j]=HellingerDistance(sequence.B[j], sequence.B[j+1])
     }
   }
 
@@ -93,20 +93,13 @@ DistanceMatrix=function(sequences, method=NULL){
   previous.names=names(sequences)
 
   #writting new elements in the input list
-  sequences$distance.matrix=distance.matrix
-  sequences$sum.distances.sequence.A=sum.distances.sequence.A
-  sequences$sum.distances.sequence.B=sum.distances.sequence.B
+  sequences[[5]]=method
+  sequences[[6]]=distance.matrix
+  sequences[[7]]=sum.distances.sequence.A
+  sequences[[8]]=sum.distances.sequence.B
+
+  #new names
+  names(sequences)=c(previous.names, "distance.method", "distance.matrix", "sum.distances.sequence.A", "sum.distances.sequence.B")
 
   return(sequences)
-}
-
-
-#' @export
-.ManhattanDistance=function(x, y){
-  sum(abs(x - y))
-}
-
-#' @export
-.HellingerDistance=function(x, y){
-  sqrt(1/2 * sum(sqrt(x)-sqrt(y))^2)
 }
