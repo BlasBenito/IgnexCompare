@@ -11,7 +11,12 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-SeqSlotEqualSampleSize=function(sequences, psi.mode="classic"){
+SeqSlotEqualSamples=function(sequences=NULL, sampling.multiplier=NULL){
+
+  #Default value for sampling.multiplier
+  if (is.null(sampling.multiplier)){
+    sampling.multiplier=1
+  }
 
   #initial checks
   if (is.null(sequences)){
@@ -42,10 +47,6 @@ SeqSlotEqualSampleSize=function(sequences, psi.mode="classic"){
     big.sequence.name="sequence.B"
   }
 
-  #computing number of samples to draw
-  # samples=sqrt(choose(big.sequence.nrow, small.sequence.nrow))
-  samples=1000
-
   #if the sequences have the same size
   if (sequence.A.nrow == sequence.B.nrow){
     small.sequence.name="sequence.A"
@@ -60,17 +61,22 @@ SeqSlotEqualSampleSize=function(sequences, psi.mode="classic"){
   big.sequence.data=sequences[[big.sequence.name]]
   big.sequence.nrow=nrow(big.sequence.data)
 
+
+  #computing number of samples to draw
+  samples = (big.sequence.nrow - small.sequence.nrow) * sampling.multiplier
+
   #computing autosum of small sequence
   small.sequence.autosum=vector()
   for (i in 1:(small.sequence.nrow-1)){
-    small.sequence.autosum[i]=ManhattanDistance(small.sequence.data[i, ], small.sequence.data[i+1, ])
+    small.sequence.autosum[i]=.ManhattanDistance(small.sequence.data[i, ], small.sequence.data[i+1, ])
   }
   small.sequence.autosum=sum(small.sequence.autosum)
 
 
 
   #vector to store results
-  psi.values=vector()
+  psi.classic.values=vector()
+  psi.modern.values=vector()
 
   #iterating through samples
   ################################
@@ -94,74 +100,44 @@ SeqSlotEqualSampleSize=function(sequences, psi.mode="classic"){
     #computing autosum of big sequence
     big.sequence.autosum=vector()
     for (i in 1:(small.sequence.nrow-1)){
-      big.sequence.autosum[i]=ManhattanDistance(big.sequence.temp[i, ], big.sequence.temp[i+1, ])
+      big.sequence.autosum[i]=.ManhattanDistance(big.sequence.temp[i, ], big.sequence.temp[i+1, ])
     }
     big.sequence.autosum=sum(big.sequence.autosum)
 
 
     #COMPUTING SLOTTING
     ######################################################################
-
-    #creating matrix to store cumulative cost
-    cumulative.cost=matrix(ncol=small.sequence.nrow, nrow=small.sequence.nrow)
-    rownames(cumulative.cost)=rownames(cost.temp)
-    colnames(cumulative.cost)=colnames(cost.temp)
-
-    #first value
-    cumulative.cost[1,1]=cost.temp[1,1]
-
-    #initiating first column
-    cumulative.cost[1, ] = cumsum(cost.temp[1, ])
-
-    #initiating the first row
-    cumulative.cost[, 1] = cumsum(cost.temp[, 1])
-
-    #rest of the array
-    for (column in 1:(small.sequence.nrow-1)){
-      for (row in 1:(small.sequence.nrow-1)){
-
-        #just for clarity
-        next.row=row+1
-        next.column=column+1
-
-        #value of the next cell
-        cumulative.cost[next.row, next.column] = min(cumulative.cost[row, next.column], cumulative.cost[next.row, column]) + cost.temp[next.row, next.column]
-
-      }
-    }
-
-    #distance
-    solution=cumulative.cost[small.sequence.nrow, small.sequence.nrow]
+    solution=LeastCost(cost.temp)
 
     #COMPUTING PSI
-    if (psi.mode=="classic"){
-
+      #psi.classic
       solution.cost=(solution*2)+(cost.temp[1,1]*2)
 
       sum.distances.sequences=big.sequence.autosum+small.sequence.autosum
 
       if (sum.distances.sequences != 0 & solution.cost != 0){
-        psi = (solution.cost - sum.distances.sequences) / sum.distances.sequences
+        psi.classic = (solution.cost - sum.distances.sequences) / sum.distances.sequences
 
       }
 
       if (sum.distances.sequences == 0 & solution.cost == 0) {
-        psi = NA
+        psi.classic = NA
       }
 
       #in some cases psi is only close to zero, I have to check why
-      if (psi < 0.0001){
-        psi=0
+      if (psi.classic < 0.0001){
+        psi.classic=0
       }
-    }
 
-    if (psi.mode=="modern"){
-      psi=solution/((small.sequence.nrow+small.sequence.nrow)-1)
-    }
+
+      #psi.modern
+      psi.modern=solution/((small.sequence.nrow+small.sequence.nrow)-1)
+
     ######################################################################
 
     #writing result
-    psi.values[sample]=psi
+    psi.classic.values[sample]=psi.classic
+    psi.modern.values[sample]=psi.modern
 
   }#END OF ITERATION THROUGH SAMPLES
 
@@ -169,13 +145,11 @@ SeqSlotEqualSampleSize=function(sequences, psi.mode="classic"){
   #####################################################################
   previous.names=names(sequences)
 
-  sequences[[9]]=samples
-  sequences[[11]]=solution
-  sequences[[12]]=NA
-  sequences[[13]]=psi.values
-  sequences[[14]]=NA
+  sequences$psi.classic=psi.classic.values
+  sequences$psi.modern=psi.modern.values
 
-  names(sequences)=c(previous.names, "iterations", "lowest.costs", "best.slotting", "best.slotting.cost", "psi", "p.value")
+  cat(paste("Psi average = ", round(mean(psi.classic.values), 3), sep=""), sep="\n")
+  cat(paste("Psi standard deviation = ", round(sd(psi.classic.values), 3), sep=""), sep="\n")
 
   return(sequences)
 

@@ -11,11 +11,7 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-SeqSlotClassic=function(sequences, psi.mode=NULL){
-
-  if(is.null(psi.mode)){
-    psi.mode="classic"
-  }
+SeqSlotClassic=function(sequences=NULL, compute.p.value=NULL){
 
   #initial checks
   if (is.null(sequences)){
@@ -23,9 +19,13 @@ SeqSlotClassic=function(sequences, psi.mode=NULL){
   }
 
   #checking if there is a distance matrix in the input object
-  if (is.na(sequences$distance.matrix)){
-    #message
+  if (!is.matrix(sequences$distance.matrix)){
     sequences=DistanceMatrix(sequences=sequences, method="manhattan")
+  }
+
+  #default value for compute.p.value
+  if (is.null(compute.p.value)){
+    compute.p.value=FALSE
   }
 
   #extracting objects from the input list
@@ -35,41 +35,12 @@ SeqSlotClassic=function(sequences, psi.mode=NULL){
 
   #input data
   cost=sequences$distance.matrix
-  cost.columns=ncol(cost)
-  cost.rows=nrow(cost)
 
-  #array to store travel costs
-  cumulative.cost=matrix(nrow=cost.rows, ncol=cost.columns)
-
-  #first value
-  cumulative.cost[1,1]=cost[1,1]
-  rownames(cumulative.cost)=rownames(cost)
-  colnames(cumulative.cost)=colnames(cost)
-
-  #initiating first column
-  cumulative.cost[1, ] = cumsum(cost[1, ])
-
-  #initiating the first row
-  cumulative.cost[, 1] = cumsum(cost[, 1])
-
-  #rest of the array
-  for (column in 1:(cost.columns-1)){
-    for (row in 1:(cost.rows-1)){
-
-      #just for clarity
-      next.row=row+1
-      next.column=column+1
-
-      #value of the next cell
-      cumulative.cost[next.row, next.column] = min(cumulative.cost[row, next.column], cumulative.cost[next.row, column]) + cost[next.row, next.column]
-
-    }
-  }
-
-  #distance
-  solution=cumulative.cost[cost.rows, cost.columns]
+  #SLOTTING
+  solution=LeastCost(cost)
 
   #COMPUTING PSI
+  #psi.classic
     solution.cost=(solution*2)+(cost[1,1]*2)
       sum.distances.sequences=sum.distances.sequence.A+sum.distances.sequence.B
       if (sum.distances.sequences != 0 & solution.cost !=0){
@@ -79,15 +50,23 @@ SeqSlotClassic=function(sequences, psi.mode=NULL){
         psi.classic = NA
       }
 
-    psi.modern=solution/((cost.rows+cost.columns)-1)
+    #psi.modern
+    psi.modern=solution/((nrow(cost)+ncol(cost))-1)
 
   #printing result
-  cat(paste("Psi value =", round(psi, 4), sep=" "), sep="\n")
+  cat(paste("Psi value =", round(psi.classic, 4), sep=" "), sep="\n")
 
-  #WRITING RESULTS (for compatibility with the other seqslot functions)
-  #####################################################################
-  previous.names=names(sequences)
+  #COMPUTING P-VALUE
+  if (compute.p.value==TRUE){
 
+    #iterating
+    for (i in 1:999){
+
+    }
+
+  }
+
+  #WRITING RESULTS
   sequences$psi.classic=psi.classic
   sequences$psi.modern=psi.modern
   sequences$p.value=NA
@@ -96,3 +75,4 @@ SeqSlotClassic=function(sequences, psi.mode=NULL){
   return(sequences)
 
 }
+
