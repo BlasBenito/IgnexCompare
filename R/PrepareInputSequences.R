@@ -240,7 +240,14 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
   result[[2]]=metadata
   result[[3]]=sequence.A
   result[[4]]=sequence.B
-  names(result)=c("taxa", "metadata", "sequence.A", "sequence.B")
+  result[[5]]=NA
+  result[[6]]=NA
+  result[[7]]=NA
+  result[[8]]=NA
+  result[[9]]=NA
+  result[[10]]=NA
+
+  names(result)=c("taxa", "metadata", "sequence.A", "sequence.B", "distance.matrix", "sum.distances.sequence.A", "sum.distances.sequence.B", "psi.classic", "psi.modern", "p.value")
 
   return(result)
 

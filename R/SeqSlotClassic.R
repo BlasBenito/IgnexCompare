@@ -23,7 +23,7 @@ SeqSlotClassic=function(sequences, psi.mode=NULL){
   }
 
   #checking if there is a distance matrix in the input object
-  if ("distance.matrix" %not-in% names(sequences)){
+  if (is.na(sequences$distance.matrix)){
     #message
     sequences=DistanceMatrix(sequences=sequences, method="manhattan")
   }
@@ -70,20 +70,16 @@ SeqSlotClassic=function(sequences, psi.mode=NULL){
   solution=cumulative.cost[cost.rows, cost.columns]
 
   #COMPUTING PSI
-  if (psi.mode=="classic"){
     solution.cost=(solution*2)+(cost[1,1]*2)
       sum.distances.sequences=sum.distances.sequence.A+sum.distances.sequence.B
       if (sum.distances.sequences != 0 & solution.cost !=0){
-        psi = (solution.cost - sum.distances.sequences) / sum.distances.sequences
-        if (psi < 0.0001){psi=0}
+        psi.classic = (solution.cost - sum.distances.sequences) / sum.distances.sequences
+        if (psi.classic < 0.0001){psi.classic=0}
       } else {
-        psi = NA
+        psi.classic = NA
       }
-  }
 
-  if (psi.mode=="modern"){
-    psi=solution/((cost.rows+cost.columns)-1)
-  }
+    psi.modern=solution/((cost.rows+cost.columns)-1)
 
   #printing result
   cat(paste("Psi value =", round(psi, 4), sep=" "), sep="\n")
@@ -92,14 +88,10 @@ SeqSlotClassic=function(sequences, psi.mode=NULL){
   #####################################################################
   previous.names=names(sequences)
 
-  sequences[[9]]=NA
-  sequences[[10]]=NA
-  sequences[[11]]=solution
-  sequences[[12]]=NA
-  sequences[[13]]=psi
-  sequences[[14]]=NA
+  sequences$psi.classic=psi.classic
+  sequences$psi.modern=psi.modern
+  sequences$p.value=NA
 
-  names(sequences)=c(previous.names, "iterations", "lowest.costs", "best.slotting", "best.slotting.cost", "psi", "p.value")
 
   return(sequences)
 
