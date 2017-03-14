@@ -8,7 +8,7 @@ Tools to compare pollen sequences (work in progress)
 
 ```R
 #Installing and loading a required package
-install.packages("devtools", dep=TRUE)
+install.packages("devtools")
 library(devtools)
 
 #Installing and loading the package IgnexTaxonomy
@@ -26,21 +26,10 @@ sequences$metadata
 sequences$sequence.A
 sequences$sequence.B
 
-#Computing manhattan distances among samples and plotting distance matrix
+#Computing manhattan distances among samples and plotting distance matrix (this step is also done by the function SeqSlotClassic, so it is here as demonstration)
 sequences=DistanceMatrix(sequences=sequences, method="manhattan")
 PlotDistanceMatrix(sequences$distance.matrix, main="Manhattan distance")
 
-#Compute best slotting using a naive brute force approach
-slotting=SeqSlotBruteForce(sequences=sequences, compute.p.value=TRUE, max.random.threshold=0.2)
-PlotSlotting(slotting)
-slotting$psi #better than the one in the book, the original slotting was wrong.
-
-#Compute best slotting using a parallelized naive brute force approach (for big datasets).
-#Requires the pacakges foreach, parallel, and doParallel
-slotting.parallel=SeqSlotBruteForceParallel(sequences=sequences, compute.p.value=TRUE, max.random.threshold = 0.2)
-PlotSlotting(slotting.parallel)
-slotting.parallel$psi
-
-#Compute best slotting using the classic algorithm. WAAAAY MORE efficient, but the plotting of the best path and the best slotting are not provided (yet?). Only provides a psi value.
+#Compute sequence slotting
 slotting.classic=SeqSlotClassic(sequences=sequences)
 slotting.classicl$psi
