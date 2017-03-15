@@ -110,35 +110,12 @@ SeqSlotEqualSamples=function(sequences=NULL, sampling.multiplier=NULL){
     solution=LeastCost(cost.temp)
 
     #COMPUTING PSI
-      #psi.classic
-      solution.cost=(solution*2)+(cost.temp[1,1]*2)
-
-      sum.distances.sequences=big.sequence.autosum+small.sequence.autosum
-
-      if (sum.distances.sequences != 0 & solution.cost != 0){
-        psi.classic = (solution.cost - sum.distances.sequences) / sum.distances.sequences
-
-      }
-
-      if (sum.distances.sequences == 0 & solution.cost == 0) {
-        psi.classic = NA
-      }
-
-      #in some cases psi is only close to zero, I have to check why
-      if (psi.classic < 0.0001){
-        psi.classic=0
-      }
-
-
-      #psi.modern
-      psi.modern=solution/((small.sequence.nrow+small.sequence.nrow)-1)
-
-    ######################################################################
+    #COMPUTING PSI
+    psi=ComputePsi(distance.matrix=cost.temp, least.cost=solution, autosum.A=big.sequence.autosum, autosum.B=small.sequence.autosum)
 
     #writing result
-    psi.classic.values[sample]=psi.classic
-    psi.modern.values[sample]=psi.modern
-
+    psi.classic.values[sample]=psi[1]
+    psi.modern.values[sample]=psi[2]
   }#END OF ITERATION THROUGH SAMPLES
 
   #WRITING RESULTS (for compatibility with the other seqslot functions)

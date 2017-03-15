@@ -29,9 +29,9 @@ SeqSlotClassic=function(sequences=NULL, compute.p.value=NULL){
   }
 
   #extracting objects from the input list
-  cost=sequences$distance.matrix
-  sum.distances.sequence.A=sequences$sum.distances.sequence.A
-  sum.distances.sequence.B=sequences$sum.distances.sequence.B
+  cost=unlist(sequences$distance.matrix)
+  sum.distances.sequence.A=unlist(sequences$sum.distances.sequence.A)
+  sum.distances.sequence.B=unlist(sequences$sum.distances.sequence.B)
 
   #input data
   cost=sequences$distance.matrix
@@ -40,37 +40,57 @@ SeqSlotClassic=function(sequences=NULL, compute.p.value=NULL){
   solution=LeastCost(cost)
 
   #COMPUTING PSI
-  #psi.classic
-    solution.cost=(solution*2)+(cost[1,1]*2)
-      sum.distances.sequences=sum.distances.sequence.A+sum.distances.sequence.B
-      if (sum.distances.sequences != 0 & solution.cost !=0){
-        psi.classic = (solution.cost - sum.distances.sequences) / sum.distances.sequences
-        if (psi.classic < 0.0001){psi.classic=0}
-      } else {
-        psi.classic = NA
-      }
-
-    #psi.modern
-    psi.modern=solution/((nrow(cost)+ncol(cost))-1)
+  psi=ComputePsi(distance.matrix=cost, least.cost=solution, autosum.A=sum.distances.sequence.A, autosum.B=sum.distances.sequence.B)
 
   #printing result
-  cat(paste("Psi value =", round(psi.classic, 4), sep=" "), sep="\n")
+  cat(paste("Psi value =", round(psi[1], 4), sep=" "), sep="\n")
+
+  #WRITING RESULTS
+  sequences$psi.classic=psi[1]
+  sequences$psi.modern=psi[2]
 
   #COMPUTING P-VALUE
+  ##################################
   if (compute.p.value==TRUE){
 
-    #iterating
-    for (i in 1:999){
+    cat("Computing p-value...", sep="\n")
 
-    }
+    #initiating number of results better than the real psi value
+    best.than=0
+    psi.reference=unlist(sequences$psi.classic)
+    iterations=(nrow(cost)+ncol(cost))*100
+
+    #iterating
+    for (i in 1:iterations){
+
+      # #randomize distance matrix
+      # random.matrix=cost[sample(1:nrow(cost), replace=FALSE), ]
+      # random.matrix=random.matrix[, sample(1:ncol(random.matrix), replace=FALSE)]
+
+      random.matrix=SwapRowCols(reference.matrix=cost, swaps=1)
+
+      #compute least cost path
+      random.solution=LeastCost(cost=random.matrix)
+
+      #compute psi
+      psi.random=ComputePsi(distance.matrix=random.matrix, least.cost=random.solution, autosum.A=sum.distances.sequence.A, autosum.B=sum.distances.sequence.B)
+
+      #storing result
+      if (psi.random[1] < psi.reference){
+        best.than = best.than + 1
+      }
+
+    }#end of 1000 iterations
+
+    sequences$p.value=best.than/1000
+
+    cat(paste("P-value =", sequences$p.value, sep=" "), sep="\n")
 
   }
 
-  #WRITING RESULTS
-  sequences$psi.classic=psi.classic
-  sequences$psi.modern=psi.modern
-  sequences$p.value=NA
 
+
+  sequences$p.value=NA
 
   return(sequences)
 

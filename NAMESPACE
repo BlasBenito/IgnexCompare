@@ -3,6 +3,7 @@
 export("%not-in%")
 export(.HellingerDistance)
 export(.ManhattanDistance)
+export(ComputePsi)
 export(DistanceMatrix)
 export(FirstUp)
 export(HandleNACases)
