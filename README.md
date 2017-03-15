@@ -33,3 +33,7 @@ PlotDistanceMatrix(sequences$distance.matrix, main="Manhattan distance")
 #Compute sequence slotting
 slotting.classic=SeqSlotClassic(sequences=sequences)
 slotting.classicl$psi
+
+#Compute sequence slotting for sequences with different sample size using the average of n bootstraps
+results.equal.sample.size=SeqSlotEqualSamples(sequences=sequences, sampling.multiplier=100)
+results.equal.sample.size$psi.classic
