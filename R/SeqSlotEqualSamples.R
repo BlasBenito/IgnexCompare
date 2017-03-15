@@ -24,13 +24,13 @@ SeqSlotEqualSamples=function(sequences=NULL, sampling.multiplier=NULL){
   }
 
   #checking if there is a distance matrix in the input object
-  if ("distance.matrix" %not-in% names(sequences)){
+  if (!is.matrix(unlist(sequences$distance.matrix))){
     #message
     sequences=DistanceMatrix(sequences=sequences, method="manhattan")
   }
 
   #extracting objects from the input list
-  cost=sequences$distance.matrix
+  cost=unlist(sequences$distance.matrix)
 
   #what sequence is longer?
   sequence.A.nrow=nrow(sequences[["sequence.A"]])
