@@ -27,7 +27,7 @@ ComputePvalue=function(sequences=NULL){
   reference.distance.matrix.ncol=ncol(reference.distance.matrix)
 
   #number of iterations to compute p-value relative to the size of the matrix
-  iterations=(reference.distance.matrix.nrow + reference.distance.matrix.ncol) *100
+  iterations=(reference.distance.matrix.nrow + reference.distance.matrix.ncol) * 100
 
   #copy of sequences
   sequences.temp=sequences
