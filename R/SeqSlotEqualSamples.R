@@ -33,8 +33,8 @@ SeqSlotEqualSamples=function(sequences=NULL, sampling.multiplier=NULL){
   cost=unlist(sequences$distance.matrix)
 
   #what sequence is longer?
-  sequence.A.nrow=nrow(sequences[["sequence.A"]])
-  sequence.B.nrow=nrow(sequences[["sequence.B"]])
+  sequence.A.nrow=nrow(unlist(sequences$sequence.A))
+  sequence.B.nrow=nrow(unlist(sequences$sequence.B))
 
   #defining small and big sequence
   if (sequence.A.nrow > sequence.B.nrow){
@@ -54,13 +54,11 @@ SeqSlotEqualSamples=function(sequences=NULL, sampling.multiplier=NULL){
     samples=1
   }
 
-
   #getting the sequences
   small.sequence.data=sequences[[small.sequence.name]]
   small.sequence.nrow=nrow(small.sequence.data)
   big.sequence.data=sequences[[big.sequence.name]]
   big.sequence.nrow=nrow(big.sequence.data)
-
 
   #computing number of samples to draw
   samples = (big.sequence.nrow - small.sequence.nrow) * sampling.multiplier
@@ -71,8 +69,6 @@ SeqSlotEqualSamples=function(sequences=NULL, sampling.multiplier=NULL){
     small.sequence.autosum[i]=.ManhattanDistance(small.sequence.data[i, ], small.sequence.data[i+1, ])
   }
   small.sequence.autosum=sum(small.sequence.autosum)
-
-
 
   #vector to store results
   psi.classic.values=vector()
@@ -116,6 +112,7 @@ SeqSlotEqualSamples=function(sequences=NULL, sampling.multiplier=NULL){
     #writing result
     psi.classic.values[sample]=psi[1]
     psi.modern.values[sample]=psi[2]
+
   }#END OF ITERATION THROUGH SAMPLES
 
   #WRITING RESULTS (for compatibility with the other seqslot functions)
