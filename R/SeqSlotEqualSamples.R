@@ -60,15 +60,15 @@ SeqSlotEqualSamples=function(sequences=NULL, sampling.multiplier=NULL){
   big.sequence.data=sequences[[big.sequence.name]]
   big.sequence.nrow=nrow(big.sequence.data)
 
-  #computing number of samples to draw
-  samples = (big.sequence.nrow - small.sequence.nrow) * sampling.multiplier
-
   #computing autosum of small sequence
   small.sequence.autosum=vector()
   for (i in 1:(small.sequence.nrow-1)){
     small.sequence.autosum[i]=.ManhattanDistance(small.sequence.data[i, ], small.sequence.data[i+1, ])
   }
   small.sequence.autosum=sum(small.sequence.autosum)
+
+  #computing number of samples to draw
+  samples = (big.sequence.nrow - small.sequence.nrow) * sampling.multiplier
 
   #vector to store results
   psi.classic.values=vector()
@@ -78,20 +78,14 @@ SeqSlotEqualSamples=function(sequences=NULL, sampling.multiplier=NULL){
   ################################
   for (sample in 1:samples){
 
+    #temporary list
+    sequences.temp=sequences
+
     #generating a sample of the big sequence
     sampling=sort(sample(1:big.sequence.nrow, small.sequence.nrow))
 
     #subsampling the big sequence
     big.sequence.temp=big.sequence.data[sampling, ]
-
-    #subsetting the cost matrix
-    if (big.sequence.name=="sequence.A"){
-      cost.temp=cost[sampling, ]
-    }
-
-    if (big.sequence.name=="sequence.B"){
-      cost.temp=cost[, sampling]
-    }
 
     #computing autosum of big sequence
     big.sequence.autosum=vector()
@@ -100,18 +94,31 @@ SeqSlotEqualSamples=function(sequences=NULL, sampling.multiplier=NULL){
     }
     big.sequence.autosum=sum(big.sequence.autosum)
 
+    #subsetting the cost matrix
+    if (big.sequence.name=="sequence.A"){
+      cost.temp=cost[sampling, ]
+      sequences.temp$sum.distance.sequence.A=big.sequence.autosum
+    }
+
+    if (big.sequence.name=="sequence.B"){
+      cost.temp=cost[, sampling]
+      sequences.temp$sum.distance.sequence.B=big.sequence.autosum
+    }
+
+    #writing distance matrix into the temporary list
+    sequences.temp$distance.matrix=cost.temp
 
     #COMPUTING SLOTTING
     ######################################################################
     solution=LeastCost(cost.temp)
 
+
     #COMPUTING PSI
-    #COMPUTING PSI
-    psi=ComputePsi(distance.matrix=cost.temp, least.cost=solution, autosum.A=big.sequence.autosum, autosum.B=small.sequence.autosum)
+    sequences.temp=ComputePsi(sequences=sequences.temp, slotting.solution=solution)
 
     #writing result
-    psi.classic.values[sample]=psi[1]
-    psi.modern.values[sample]=psi[2]
+    psi.classic.values[sample]=unlist(sequences.temp$psi.classic)
+    psi.modern.values[sample]=unlist(sequences.temp$psi.modern)
 
   }#END OF ITERATION THROUGH SAMPLES
 
