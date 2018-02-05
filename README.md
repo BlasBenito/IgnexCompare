@@ -1,8 +1,6 @@
 # IgnexCompare
 Tools to compare pollen sequences (work in progress)
 
-**THIS IS A WORK IN PROGRESS, BE PATIENT!**
-
 
 ##SEQUENCE SLOTTING
 
