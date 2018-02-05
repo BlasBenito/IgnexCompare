@@ -21,6 +21,7 @@ ComputePsi=function(sequences=NULL, slotting.solution=NULL){
     stop("Argument 'slotting.solution' is missing!")
   }
 
+  #getting the distance matrix
   distance.matrix=unlist(sequences$distance.matrix)
 
   #cost of the best solution computed as in the original code
