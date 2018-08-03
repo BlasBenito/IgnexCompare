@@ -44,7 +44,7 @@ ComputePvalue=function(sequences=NULL){
     sequences.temp$distance.matrix=random.matrix
 
     #compute least cost path
-    random.solution=LeastCost(cost=random.matrix)
+    random.solution=LeastCost(cost=random.matrix)$cumulative.distance
 
     #compute psi
     sequences.temp=ComputePsi(sequences=sequences.temp, slotting.solution=random.solution)
@@ -54,7 +54,7 @@ ComputePvalue=function(sequences=NULL){
       better.than.reference.value = better.than.reference.value + 1
     }
 
-  }#end of 1000 iterations
+  }#end of iterations
 
   sequences$p.value=better.than.reference.value/iterations
 

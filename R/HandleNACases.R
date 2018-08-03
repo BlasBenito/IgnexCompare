@@ -1,10 +1,10 @@
 #' Prepare input sequences.
 #'
-#' This function takes a pollen sequence as reference (sequence.A), and a target pollen sequence (sequence.B), checks the integrity of the reference sequence, and tries to adapt the target sequence to the characteristics of the reference sequence: matching column names and number of columns, and no missing data. Missing data can be handled in two ways: 1) deleting rows with NA or empty cases; 2) interpolation of empty data using the average or weighted average of contiguous cases.
+#' This function takes a pollen sequence as reference (sequence.A), and a target pollen sequence (sequence.B), checks the integrity of the reference sequence, and tries to adapt the target sequence to the characteristics of the reference sequence: matching column names and number of columns, and no missing data. Missing data can be handled in two ways: 1) deleting rows with NA or empty cases; 2) replacing NA data with zeros.
 #'
 #' @param sequence A dataframe containing pollen data. This sequence will be compared with and adapted to the structure of sequence.A
 #' @param sequence.name A character string with the name of the sequence.
-#' @param if.empty.cases A character argument with two possible values "omit" or "interpolate". The default value is "omit", but it removes every row with at least one empty record. The option "interpolate" uses the function \strong{na.approx} of the package \strong{zoo}, which interpolates the cases linearly.
+#' @param if.empty.cases A character argument with two possible values "omit", or "zero". The default value is "omit", but it removes every row with at least one empty record. The option "zero" replaces NA data with zeros.
 #' @return The function returns the reformatted target sequence as a data frame.
 #' @author Blas Benito <blasbenito@gmail.com>
 #' @examples
@@ -30,10 +30,7 @@ HandleNACases=function(sequence=NULL, sequence.name=NULL, if.empty.cases=NULL, s
     sequence.name=""
   }
 
-  #error if it was not set properly
-  if (if.empty.cases!="omit" & if.empty.cases!="interpolate"){
-    stop("Wrong value in the argument 'if.empty.cases'. It can only have the values 'omit' or 'interpolate'.")
-  }
+
 
   #message
   if (silent == FALSE){cat(paste("Handling empty and NA cases of the sequence '", sequence.name,"'.", sep=" "), sep="\n")}
@@ -80,51 +77,18 @@ HandleNACases=function(sequence=NULL, sequence.name=NULL, if.empty.cases=NULL, s
     }#end of IF if.empty.cases="omit"
 
 
-    #IF if.empty.cases="interpolate"
-    if (if.empty.cases=="interpolate"){
-      require("zoo")
+    #IF if.empty.cases="zero"
+    if (if.empty.cases=="zero"){
 
-      #identify columns with NA
-      columns.with.NA=colnames(sequence)[colSums(is.na(sequence)) > 0]
+      if (silent == FALSE){cat(paste("Replacing NAs with zero.", sep=" "), sep="\n")}
 
-      #message
-      if (silent == FALSE){cat(paste("Interpolating", sum.na.cases, "NA cases in", length(columns.with.NA), "columns.", sep=" "), sep="\n")}
+      #remove rows with NA
+      sequence[is.na(sequence)]=0
 
-      #iterating through columns with NA to interpolate missing valeus
-      for (current.column in 1:length(columns.with.NA)){
+      return(sequence)
 
-        #getting column name
-        current.column.name=columns.with.NA[current.column]
+    }#end of IF if.empty.cases="omit"
 
-        #interpolating value
-        sequence[, current.column.name]=na.approx(sequence[, current.column.name], rule=2)
-
-         }
-
-      #checking that there are no more NA cases (just in case na.approx fails)
-      sum.na.cases=sum(is.na(sequence))
-
-
-      #if NA cases are gone
-      if (sum.na.cases==0){
-
-        if (silent == FALSE){cat("All NA cases were interpolated correctly, returning result.", sep="\n")}
-        return(sequence)
-
-      }
-
-      #if there are still NA cases
-      if (sum.na.cases>0){
-
-        if (silent == FALSE){cat(paste(sum.na.cases, "were not interpolated correctly, removing", sum(!complete.cases(sequence)), "rows containing these cases.", sep=" "), sep="\n")}
-
-        sequence=sequence[complete.cases(sequence), ]
-
-        return(sequence)
-      }
-
-
-    }#end of INTERPOLATE
 
   }#end of HANDLING EMPTY CASES
 

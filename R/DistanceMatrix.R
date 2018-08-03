@@ -5,7 +5,7 @@
 #' @usage
 #'
 #' @param sequences A list produced by the function \emph{PrepareInputSequences}.
-#' @param method Either "manhattan" (default) or "hellinger".
+#' @param method Either "manhattan" computed as \emph{sum(abs(x - y))}, "hellinger" computed as \emph{sqrt(1/2 * sum(sqrt(x)-sqrt(y))^2)}, or "euclidean", computed as \emph{sqrt(sum((x - y)^2))}.
 #' @return A matrix with manhattan or hellinger distances among cases of the sequences contained in the list \emph{sequences}. The sequence sequence.A will define the rows, and sequence.B will define the columns.
 #' @author Blas Benito <blasbenito@gmail.com>
 #' @examples
@@ -16,7 +16,7 @@ DistanceMatrix=function(sequences, method=NULL){
   if (is.null(method)==TRUE){method="manhattan"}
 
   #error in method name
-  if (method!="manhattan" & method!="hellinger"){
+  if (method!="manhattan" & method!="hellinger" & method!="euclidean"){
     stop("The 'method' name should be either 'manhattan' or 'hellinger'")
   }
 
@@ -47,6 +47,15 @@ DistanceMatrix=function(sequences, method=NULL){
     for (i in 1:nrow.sequence.A){
       for (j in 1:nrow.sequence.B){
         distance.matrix[i,j]=.HellingerDistance(sequence.A[i,], sequence.B[j,])
+      }
+    }
+  }
+
+  #computing euclidean distance
+  if (method=="euclidean"){
+    for (i in 1:nrow.sequence.A){
+      for (j in 1:nrow.sequence.B){
+        distance.matrix[i,j]=.EuclideanDistance(sequence.A[i,], sequence.B[j,])
       }
     }
   }
@@ -84,6 +93,17 @@ DistanceMatrix=function(sequences, method=NULL){
     }
   }
 
+  #computing manhattan distance
+  if (method=="euclidean"){
+    for (i in 1:nrow.sequence.A-1){
+      distances.sequence.A[i]=.EuclideanDistance(sequence.A[i], sequence.A[i+1])
+    }
+
+    for (j in 1:nrow.sequence.B-1){
+      distances.sequence.B[j]=.EuclideanDistance(sequence.B[j], sequence.B[j+1])
+    }
+  }
+
   #SUMMING DISTANCES
   sum.distances.sequence.A=sum(distances.sequence.A)
   sum.distances.sequence.B=sum(distances.sequence.B)
@@ -109,4 +129,9 @@ DistanceMatrix=function(sequences, method=NULL){
 #' @export
 .HellingerDistance=function(x, y){
   sqrt(1/2 * sum(sqrt(x)-sqrt(y))^2)
+}
+
+#' @export
+.EuclideanDistance=function(x, y){
+  sqrt(sum((x - y)^2))
 }

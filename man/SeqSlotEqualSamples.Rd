@@ -20,4 +20,3 @@ str(results.table)
 \author{
 Blas Benito <blasbenito@gmail.com>
 }
-

@@ -1,3 +1,10 @@
+#development
+
+#update help files
+roxygen2::roxygenise()
+
+
+
 #test
 # install_github("IGNEX/IgnexCompare")
 library(IgnexCompare)
@@ -6,17 +13,41 @@ library(IgnexCompare)
 seqB=SequenceB[c(7,16,25,29,32,36,39), ]
 seqA=SequenceA[c(6,11,22,24,29,31,38,39,43,45), ]
 
-#Preparing input data
-sequences=PrepareInputSequences(sequence.A=seqA, sequence.B=seqB, sequence.A.name="Abernethy Forest 1970" , sequence.B.name="Abernethy Forest 1974", if.empty.cases="interpolate", output.type="proportion")
+#PREPARING INPUT DATA
+##################################################
+sequences=PrepareInputSequences(sequence.A=seqA, sequence.B=seqB, sequence.A.name="Abernethy Forest 1970" , sequence.B.name="Abernethy Forest 1974", if.empty.cases="zero", transformation="none")
 names(sequences)
 sequences$metadata
 sequences$sequence.A
 sequences$sequence.B
 
-#Computing manhattan distances among samples and plotting distance matrix (this step is also done by the function SeqSlotClassic, so it is here as demonstration)
-sequences=DistanceMatrix(sequences=sequences, method="manhattan")
-PlotDistanceMatrix(sequences$distance.matrix, main="Manhattan distance")
 
-#Compute sequence slotting
-slotting.results=SeqSlotClassic(sequences=sequences)
+#COMPUTING SLOTTING AND p-value THROUGH DISTANCE MATRIX RANDOMIZATION
+##########################################################################
+sequences=SeqSlotClassic(sequences=sequences, compute.p.value=TRUE, method="manhattan")
+sequences$psi.classic
+sequences$p.value
+
+#plotting the distance matrix and the best alignment among sequences
+PlotDistanceMatrix(sequences$distance.matrix, title="Manhattan distance")
+lines(sequences$pairings$A, sequences$pairings$B)
+
+
+#OTHER OPTIONS
+#################################################
+
+#Computing and plotting distance matrices (this step is also done by the function SeqSlotClassic, so it is here as demonstration)
+##################################################
+#hellinger distance, computed as sqrt(1/2 * sum(sqrt(x)-sqrt(y))^2)
+sequences=DistanceMatrix(sequences=sequences, method="hellinger")
+PlotDistanceMatrix(sequences$distance.matrix, title="Hellinger distance")
+
+#euclidean distance, computed as sqrt(sum((x - y)^2))
+sequences=DistanceMatrix(sequences=sequences, method="euclidean")
+PlotDistanceMatrix(sequences$distance.matrix, title="Euclidean distance")
+
+
+#COMPUTING p-value THROUGH DISTANCE MATRIX RANDOMIZATION USING A DIFFERENT DISTANCE METHOD
+slotting.results=SeqSlotClassic(sequences=sequences, compute.p.value=TRUE, method="euclidean")
 slotting.results$psi.classic
+slotting.results$p.value

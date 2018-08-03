@@ -8,6 +8,12 @@
 }
 \arguments{
 \item{sequences}{A list produced by the function \emph{PrepareInputSequences} or \emph{DistanceMatrix}}
+
+\item{compute.p.value}{Boolean. Use TRUE to compute p-values via distance matrix randomization.}
+
+\item{method}{Either "manhattan" computed as \emph{sum(abs(x - y))}, "hellinger" computed as \emph{sqrt(1/2 * sum(sqrt(x)-sqrt(y))^2)}, or "euclidean", computed as \emph{sqrt(sum((x - y)^2))}.}
+
+\item{silent}{Boolean. Use TRUE to remove all messages.}
 }
 \description{
 It takes as inputs two pollen sequences produced by the function \emph{PrepareInputSequences}, and computes the best slotting.
@@ -20,4 +26,3 @@ str(results.table)
 \author{
 Blas Benito <blasbenito@gmail.com>
 }
-

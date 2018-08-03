@@ -6,8 +6,9 @@
 #' @param sequence.A.name A character string with the name of the sequence.
 #' @param sequence.B A dataframe containing pollen data. This sequence will be compared with and adapted to the structure of sequence.A
 #' @param sequence.B.name A character string with the name of the sequence.
-#' @param if.empty.cases A character argument with two possible values "omit" or "interpolate". The default value is "omit", but it removes every row with at least one empty record. The option "interpolate" uses the method... WORK IN PROGRESS
-#' @param rescale Boolean, TRUE to rescale data between 0 and 100 for all taxa, FALSE (default value) to use the actual pollen values.
+#' @param if.empty.cases A character argument with two possible values "omit", or "zero". The default value is "omit", but it removes every row with at least one empty record. The option "zero" replaces NA data with zeros.
+#' @param transformation "none", "percentage", "proportion", "hellinger"
+#' @param silent Boolean, set to TRUE to hide all messages, and set to FALSE otherwise.
 #' @return A list with four slots:
 #' \itemize{
 #' \item \emph{taxa} Common column names of the sequences, listing the taxa included in them.
@@ -19,33 +20,31 @@
 #' @examples
 #' data(InputDataExample)
 #' @export
-PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B=NULL, sequence.B.name=NULL, if.empty.cases=NULL, output.type=NULL, silent=NULL){
+PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B=NULL, sequence.B.name=NULL, if.empty.cases=NULL, transformation=NULL, silent=NULL){
 
-  #OUTPUT TYPES
-  # "rescaled"
-  # "proportion"
-  # "percentage"
-  # "rescaled-proportion"
-  # "rescaled-percentage"
 
-  #SILENT?
-  if (is.null(silent)){silent=FALSE}
-
-  #CHECKING INPUT DATA
-  #defining the default value for fuzzy match
+  #CHECKING if.empty.cases
+  ##############################################################
   if (is.null(if.empty.cases)){if.empty.cases="omit"}
 
-  #SETTING A DEFAULT VALUE FOR output.type ("raw" returns raw pollen counts).
-  if (is.null(output.type)){
-    message("Warning, output.type was ommited, returning raw pollen counts.")
-    output.type="raw"
+  if (if.empty.cases!="omit" & if.empty.cases!="zero"){
+    stop("Wrong value in the argument 'if.empty.cases'. It can only have the values 'omit', 'interpolate', or 'zero'.")
   }
 
-  if (output.type %not-in% c("raw", "rescaled", "proportion", "percentage", "rescaled-proportion", "rescaled-percentage")){
-    stop("The value of output.type should be one of those: 'raw', 'rescaled', 'proportion', 'percentage', 'rescaled', or 'percentage'.")
+
+  #CHECKING transformation
+  ##############################################################
+  if (is.null(transformation)){
+    message("Warning, setting the value of 'transformation' to 'none'.")
+    transformation="none"
   }
 
-  #data not provided
+  if (transformation %not-in% c("none", "percentage", "proportion", "hellinger")){
+    stop("The 'transformation' argument only accepts the values: 'none', 'percentage', or 'hellinger'.")
+  }
+
+  #CHECKING INPUT DATA
+  ##############################################################
   if (is.null(sequence.A)){
     stop("ERROR: reference sequence was not provided.")
   }
@@ -67,9 +66,14 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
   }
 
 
-  #TESTING DATASETS
-  #####################
-  #####################
+  #SILENT?
+  ##############################################################
+  if (is.null(silent)){silent=FALSE}
+
+
+  #TESTING DATASETS AND SUBSETTING COLUMNS
+  ##############################################################
+  ##############################################################
   if (silent==FALSE){cat("Checking input datasets...", sep="\n")}
 
 
@@ -89,7 +93,8 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
   #OVERLAP OF COMMON COLUMN NAMES
   common.column.names=intersect(colnames(sequence.A), colnames(sequence.B))
 
-  #ORIGINAL DIMENSIONS OF THE TABLES
+
+  #ORIGINAL DIMENSIONS OF THE DATAFRAMES
   sequence.A[is.na(sequence.A=="")]=NA
   sequence.B[is.na(sequence.B=="")]=NA
   original.na.sequence.A=sum(is.na(sequence.A))
@@ -103,6 +108,7 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
   #WHAT COLUMNS WERE REMOVED FROM THE TARGET DATASET?
   removed.column.names.sequence.A=setdiff(colnames(sequence.A), common.column.names)
   removed.column.names.sequence.B=setdiff(colnames(sequence.B), common.column.names)
+
 
   if (length(removed.column.names.sequence.A)==0){
     removed.column.names.sequence.A=""
@@ -139,7 +145,8 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
 
 
   #HANDLING NA DATA
-  #################
+  ##############################################################
+  ##############################################################
   sequence.A=HandleNACases(sequence=sequence.A, sequence.name=sequence.A.name, if.empty.cases=if.empty.cases, silent=silent)
   sequence.B=HandleNACases(sequence=sequence.B, sequence.name=sequence.B.name, if.empty.cases=if.empty.cases, silent=silent)
 
@@ -147,57 +154,34 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
   final.na.sequence.A=sum(is.na(sequence.A))
   final.na.sequence.B=sum(is.na(sequence.B))
 
+  #APPLYING TRANSFORMATIONS "none", "percentage", "proportion", "hellinger"
+  ##############################################################
+  ##############################################################
 
-  #COMPUTING POLLEN PROPORTIONS
+  #COMPUTING PROPORTION
   #############################
-  if (output.type=="proportion"){
+  if (transformation=="proportion"){
 
     sequence.A=sweep(sequence.A, 1, rowSums(sequence.A), FUN="/")
     sequence.B=sweep(sequence.B, 1, rowSums(sequence.B), FUN="/")
 
   }
 
-  #COMPUTING POLLEN PERCENTAGE
+  #COMPUTING PERCENTAGE
   ############################
-  if (output.type=="percentage"){
+  if (transformation=="percentage"){
 
     sequence.A=sweep(sequence.A, 1, rowSums(sequence.A), FUN="/")*100
     sequence.B=sweep(sequence.B, 1, rowSums(sequence.B), FUN="/")*100
 
   }
 
+  #COMPUTING HELLINGER TRANSFORMATION
+  #############################
+  if (transformation=="hellinger"){
 
-  #RESCALING DATA
-  #################
-  if (output.type=="rescaled" | output.type=="rescaled-proportion" | output.type=="rescaled-percentage"){
-
-    #COMPUTING PROPORTION
-    if (output.type=="rescaled-proportion"){
-
-      sequence.A=sweep(sequence.A, 1, rowSums(sequence.A), FUN="/")
-      sequence.B=sweep(sequence.B, 1, rowSums(sequence.B), FUN="/")
-    }
-
-    #COMPUTING PERCENTAGE
-    if (output.type=="rescaled-percentage"){
-
-      sequence.A=sweep(sequence.A, 1, rowSums(sequence.A), FUN="/")*100
-      sequence.B=sweep(sequence.B, 1, rowSums(sequence.B), FUN="/")*100
-    }
-
-    #adding temporary columns to sequences to make identification easier
-    sequence.A$id="A"
-    sequence.B$id="B"
-
-    #only one dataset
-    sequence.temp=rbind(sequence.A, sequence.B)
-
-    #rescale
-    sequence.temp=RescalePollenSequence(sequence=sequence.temp, columns=common.column.names)
-
-    #getting back sequences
-    sequence.A=sequence.temp[which(sequence.temp$id=="A"),common.column.names]
-    sequence.B=sequence.temp[which(sequence.temp$id=="B"),common.column.names]
+    sequence.A=sqrt(sweep(sequence.A, 1, rowSums(sequence.A), FUN="/"))
+    sequence.B=sqrt(sweep(sequence.B, 1, rowSums(sequence.B), FUN="/"))
 
   }
 
@@ -230,9 +214,9 @@ PrepareInputSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B
   metadata[5,1:3]=c("final.columns", ncol(sequence.A), ncol(sequence.B))
   metadata[6,1:3]=c("excluded.columns", removed.column.names.sequence.A, removed.column.names.sequence.B)
   metadata[7,1:3]=c("initial.empty.cases", original.na.sequence.A, original.na.sequence.B)
-  metadata[8,1:3]=c("if.NA.cases", if.empty.cases, if.empty.cases)
-  metadata[9,1:3]=c("final.NA.cases", final.na.sequence.A, final.na.sequence.B)
-  metadata[10,1:3]=c("output.type", output.type, output.type)
+  metadata[8,1:3]=c("if.empty.cases", if.empty.cases, if.empty.cases)
+  metadata[9,1:3]=c("final.empty.cases", final.na.sequence.A, final.na.sequence.B)
+  metadata[10,1:3]=c("transformation", transformation, transformation)
 
   #list
   result=list()

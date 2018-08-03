@@ -9,7 +9,7 @@
 \arguments{
 \item{sequences}{A list produced by the function \emph{PrepareInputSequences}.}
 
-\item{method}{Either "manhattan" (default) or "hellinger".}
+\item{method}{Either "manhattan" computed as \emph{sum(abs(x - y))}, "hellinger" computed as \emph{sqrt(1/2 * sum(sqrt(x)-sqrt(y))^2)}, or "euclidean", computed as \emph{sqrt(sum((x - y)^2))}.}
 }
 \value{
 A matrix with manhattan or hellinger distances among cases of the sequences contained in the list \emph{sequences}. The sequence sequence.A will define the rows, and sequence.B will define the columns.
@@ -20,4 +20,3 @@ Generates a matrix of manhattan or hellinguer distances between the rows of two 
 \author{
 Blas Benito <blasbenito@gmail.com>
 }
-

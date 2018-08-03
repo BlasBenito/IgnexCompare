@@ -15,4 +15,3 @@ A dataframe with n rows, and a predefined set of columns
 \author{
 Blas Benito <blasbenito@gmail.com>
 }
-

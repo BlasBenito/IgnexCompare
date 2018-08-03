@@ -12,8 +12,9 @@
 \value{
 whatever
 \itemize{
- \item{"parameter 1"}{Stuff}
- \item{"parameter 2"}{Stuff}
+ \item{"distance.matrix"}{Matrix of distance among samples of both sequences. It is a rectangular matrix}
+ \item{"title"}{String. Plot title.}
+ \item{"path"}{Path where to store the plot.}
 }
 }
 \description{
@@ -28,4 +29,3 @@ str(results.table)
 \author{
 Blas Benito <blasbenito@gmail.com>
 }
-

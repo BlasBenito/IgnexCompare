@@ -12,13 +12,13 @@ HandleNACases(sequence = NULL, sequence.name = NULL,
 
 \item{sequence.name}{A character string with the name of the sequence.}
 
-\item{if.empty.cases}{A character argument with two possible values "omit" or "interpolate". The default value is "omit", but it removes every row with at least one empty record. The option "interpolate" uses the function \strong{na.approx} of the package \strong{zoo}, which interpolates the cases linearly.}
+\item{if.empty.cases}{A character argument with two possible values "omit", or "zero". The default value is "omit", but it removes every row with at least one empty record. The option "zero" replaces NA data with zeros.}
 }
 \value{
 The function returns the reformatted target sequence as a data frame.
 }
 \description{
-This function takes a pollen sequence as reference (sequence.A), and a target pollen sequence (sequence.B), checks the integrity of the reference sequence, and tries to adapt the target sequence to the characteristics of the reference sequence: matching column names and number of columns, and no missing data. Missing data can be handled in two ways: 1) deleting rows with NA or empty cases; 2) interpolation of empty data using the average or weighted average of contiguous cases.
+This function takes a pollen sequence as reference (sequence.A), and a target pollen sequence (sequence.B), checks the integrity of the reference sequence, and tries to adapt the target sequence to the characteristics of the reference sequence: matching column names and number of columns, and no missing data. Missing data can be handled in two ways: 1) deleting rows with NA or empty cases; 2) replacing NA data with zeros.
 }
 \examples{
 data(InputDataExample)
@@ -26,4 +26,3 @@ data(InputDataExample)
 \author{
 Blas Benito <blasbenito@gmail.com>
 }
-

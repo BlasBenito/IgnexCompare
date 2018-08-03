@@ -31,11 +31,11 @@ ComputePsi=function(sequences=NULL, slotting.solution=NULL){
   sum.distances.sequences=unlist(sequences$sum.distances.sequence.A) + unlist(sequences$sum.distances.sequence.B)
 
   #psi.classic
+  #0 if they are the same sequence
+  if (solution.cost == 0){psi.classic=0}
+
   if (sum.distances.sequences != 0 & solution.cost !=0){
     psi.classic = (solution.cost - sum.distances.sequences) / sum.distances.sequences
-    if (psi.classic < 0.0001){psi.classic=0}
-  } else {
-    psi.classic = NA
   }
 
   #psi.modern

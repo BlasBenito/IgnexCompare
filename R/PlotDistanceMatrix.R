@@ -7,8 +7,9 @@
 #' @param param Number of rows of the results table.
 #' @return whatever
 #' \itemize{
-#'  \item{"parameter 1"}{Stuff}
-#'  \item{"parameter 2"}{Stuff}
+#'  \item{"distance.matrix"}{Matrix of distance among samples of both sequences. It is a rectangular matrix}
+#'  \item{"title"}{String. Plot title.}
+#'  \item{"path"}{Path where to store the plot.}
 #' }
 #' @author Blas Benito <blasbenito@gmail.com>
 #' @examples
@@ -17,9 +18,9 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-PlotDistanceMatrix=function(distance.matrix, main=NULL, path=NULL){
+PlotDistanceMatrix=function(distance.matrix, title=NULL, path=NULL){
 
-  if (is.null(main)){main="Distance matrix"}
+  if (is.null(title)){title="Distance matrix"}
 
   # require(fields)
   require(RColorBrewer)
@@ -27,7 +28,7 @@ PlotDistanceMatrix=function(distance.matrix, main=NULL, path=NULL){
   x.axis=as.numeric(rownames(distance.matrix))
   y.axis=as.numeric(colnames(distance.matrix))
 
-  image.plot(x.axis, y.axis, distance.matrix, xlab="Sequence A", ylab="Sequence B", main=main, col=rev(brewer.pal(9, "RdBu")))
+  image.plot(x.axis, y.axis, distance.matrix, xlab="Sequence A", ylab="Sequence B", main=title, col=colorRampPalette(rev(brewer.pal(9, "RdBu")))(max(distance.matrix)-min(distance.matrix)))
 
   #plotting path if it exists
   if(!is.null(path)){

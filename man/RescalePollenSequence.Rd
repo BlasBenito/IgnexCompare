@@ -28,4 +28,3 @@ data(InputDataExample)
 \author{
 Blas Benito <blasbenito@gmail.com>
 }
-

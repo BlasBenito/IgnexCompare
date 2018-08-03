@@ -6,7 +6,7 @@
 \usage{
 PrepareInputSequences(sequence.A = NULL, sequence.A.name = NULL,
   sequence.B = NULL, sequence.B.name = NULL, if.empty.cases = NULL,
-  output.type = NULL, silent = NULL)
+  transformation = NULL, silent = NULL)
 }
 \arguments{
 \item{sequence.A}{A dataframe containing pollen counts or percentages. This sequence will be used as reference. It will be checked for empty cases.}
@@ -17,9 +17,11 @@ PrepareInputSequences(sequence.A = NULL, sequence.A.name = NULL,
 
 \item{sequence.B.name}{A character string with the name of the sequence.}
 
-\item{if.empty.cases}{A character argument with two possible values "omit" or "interpolate". The default value is "omit", but it removes every row with at least one empty record. The option "interpolate" uses the method... WORK IN PROGRESS}
+\item{if.empty.cases}{A character argument with two possible values "omit", or "zero". The default value is "omit", but it removes every row with at least one empty record. The option "zero" replaces NA data with zeros.}
 
-\item{rescale}{Boolean, TRUE to rescale data between 0 and 100 for all taxa, FALSE (default value) to use the actual pollen values.}
+\item{transformation}{"none", "percentage", "proportion", "hellinger"}
+
+\item{silent}{Boolean, set to TRUE to hide all messages, and set to FALSE otherwise.}
 }
 \value{
 A list with four slots:
@@ -39,4 +41,3 @@ data(InputDataExample)
 \author{
 Blas Benito <blasbenito@gmail.com>
 }
-
