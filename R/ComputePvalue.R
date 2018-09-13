@@ -11,7 +11,7 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-ComputePvalue=function(sequences=NULL){
+ComputePvalue=function(sequences=NULL, diagonal=diagonal){
 
   if (is.null(sequences)){
     stop("Input list not provided!")
@@ -19,7 +19,7 @@ ComputePvalue=function(sequences=NULL){
 
   #initiating number of results better than the real psi value
   better.than.reference.value=0
-  psi.reference=unlist(sequences$psi.classic)
+  psi.reference=unlist(sequences$psi)
 
   #getting the distance matrix
   reference.distance.matrix=unlist(sequences$distance.matrix)
@@ -40,17 +40,17 @@ ComputePvalue=function(sequences=NULL){
     # random.matrix=random.matrix[, sample(1:reference.distance.matrix.ncol, replace=FALSE)]
 
     #swap two adjacent columns and rows in the matrix (and include it in a fake sequences list)
-    random.matrix=.SwapRowCols(reference.distance.matrix)
+    random.matrix=.ShuffleMatrix(reference.distance.matrix)
     sequences.temp$distance.matrix=random.matrix
 
     #compute least cost path
-    random.solution=LeastCost(cost=random.matrix)$cumulative.distance
+    random.solution=LeastCost(cost=random.matrix, diagonal=diagonal)$cumulative.distance
 
     #compute psi
     sequences.temp=ComputePsi(sequences=sequences.temp, slotting.solution=random.solution)
 
     #storing result
-    if (unlist(sequences.temp$psi.classic) < psi.reference){
+    if (unlist(sequences.temp$psi) < psi.reference){
       better.than.reference.value = better.than.reference.value + 1
     }
 
@@ -65,7 +65,7 @@ ComputePvalue=function(sequences=NULL){
 
 
 #' @export
-.SwapRowCols=function(reference.distance.matrix=NULL){
+.ShuffleMatrix=function(reference.distance.matrix=NULL){
 
   if (is.null(reference.distance.matrix)){stop("No reference matrix provided.")}
 
@@ -82,7 +82,7 @@ ComputePvalue=function(sequences=NULL){
   rows.range=2:(nrow(reference.distance.matrix)-1)
 
   #left or right
-  left.or.right=c(-1, 1)
+  # left.or.right=c(-1, 1)
 
   #swapping rows and columns
   for (i in 1:swaps){

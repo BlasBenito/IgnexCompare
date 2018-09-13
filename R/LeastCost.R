@@ -4,20 +4,24 @@
 #'
 #' @usage
 #'
-#' @param sequences A list produced by the function \emph{PrepareInputSequences} or \emph{DistanceMatrix}
+#' @param cost A distance matrix produced by \emph{DistanceMatrix}.
+#' @param diagonal Boolean. If FALSE, the cost is computed
 #' @author Blas Benito <blasbenito@gmail.com>
 #' @examples
 #' #generating random input data
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #'@export
-LeastCost=function(cost){
+LeastCost=function(cost, diagonal){
+
+  #setting diagonal if it's empty
+  if(is.null(diagonal)){diagonal=FALSE}
 
   #dimensions
   cost.columns=ncol(cost)
   cost.rows=nrow(cost)
 
-  #matrix to store travel costs
+  #matrix to store cumulative cost
   cumulative.cost=matrix(nrow=cost.rows, ncol=cost.columns)
   rownames(cumulative.cost)=rownames(cost)
   colnames(cumulative.cost)=colnames(cost)
@@ -33,31 +37,22 @@ LeastCost=function(cost){
   #initiating the first row
   cumulative.cost[, 1] = cumsum(cost[, 1])
 
-  #rest of the matrix
+  #computing cumulative cost
   for (column in 1:(cost.columns-1)){
     for (row in 1:(cost.rows-1)){
 
-      #just for clarity
       next.row=row+1
       next.column=column+1
 
-      #value of the next cell (NO DIAGONALS)
-      # cumulative.cost[next.row, next.column] = min(cumulative.cost[row, next.column], cumulative.cost[next.row, column]) + cost[next.row, next.column]
+      if(diagonal==TRUE){
+        cumulative.cost[next.row, next.column] = min(cumulative.cost[row, next.column], cumulative.cost[next.row, column], cumulative.cost[row, column]) + cost[next.row, next.column]
+      } else {
+        cumulative.cost[next.row, next.column] = min(cumulative.cost[row, next.column], cumulative.cost[next.row, column]) + cost[next.row, next.column]
+      }
 
-      #value of the next cell (INCLUDING DIAGONALS)
-      cumulative.cost[next.row, next.column] = min(cumulative.cost[row, next.column], cumulative.cost[next.row, column], cumulative.cost[row, column]) + cost[next.row, next.column]
+    } #end of rows
+  } #end of columns
 
-      #value of the next cell (ORIGINAL FORTRAN CODE MODIFIED FOR DIAGONALS)
-      # cumulative.cost[next.row, next.column] = min(
-      #   (cumulative.cost[row, next.column] + cost[row, next.column]),
-      #   (cumulative.cost[next.row, column] + cost[next.row, column]),
-      #   (cumulative.cost[row, column] + cost[row, column])
-      #   )
-      #   + cost[row, column]
-
-
-    }
-  }
 
   #BACKWARDS PASS TO COMPUTE BEST ALIGNMENT BETWEEN SEQUENCES
   # backwards.pass<-function(cost, cumulative.cost){
@@ -79,7 +74,12 @@ LeastCost=function(cost){
     #SCANNING NEIGHBORS
 
     #dataframe with neighbors
+    if(diagonal==TRUE){
     neighbors<-data.frame(A=c(focal.row-1, focal.row-1, focal.row), B=c(focal.column, focal.column-1, focal.column-1))
+    } else {
+      neighbors<-data.frame(A=c(focal.row-1, focal.row), B=c(focal.column, focal.column-1))
+    }
+
 
     #removing neighbors with coordinates lower than 1 (out of bounds)
     neighbors[neighbors<1]<-NA

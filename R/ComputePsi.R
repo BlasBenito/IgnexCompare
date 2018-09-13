@@ -30,20 +30,20 @@ ComputePsi=function(sequences=NULL, slotting.solution=NULL){
   #autosum of sequences
   sum.distances.sequences=unlist(sequences$sum.distances.sequence.A) + unlist(sequences$sum.distances.sequence.B)
 
-  #psi.classic
+  #psi
   #0 if they are the same sequence
-  if (solution.cost == 0){psi.classic=0}
+  if (solution.cost == 0){psi=0}
 
   if (sum.distances.sequences != 0 & solution.cost !=0){
-    psi.classic = (solution.cost - sum.distances.sequences) / sum.distances.sequences
+    psi = (solution.cost - sum.distances.sequences) / sum.distances.sequences
   }
 
   #psi.modern
-  psi.modern=slotting.solution/((nrow(distance.matrix)+ncol(distance.matrix))-1)
+  # psi.modern=slotting.solution/((nrow(distance.matrix)+ncol(distance.matrix))-1)
 
   #WRITING RESULTS
-  sequences$psi.classic=psi.classic
-  sequences$psi.modern=psi.modern
+  sequences$psi=psi
+  # sequences$psi.modern=psi.modern
 
   return(sequences)
 

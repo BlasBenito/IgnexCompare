@@ -7,7 +7,9 @@
 
 }
 \arguments{
-\item{sequences}{A list produced by the function \emph{PrepareInputSequences} or \emph{DistanceMatrix}}
+\item{cost}{A distance matrix produced by \emph{DistanceMatrix}.}
+
+\item{diagonal}{Boolean. If FALSE, the cost is computed}
 }
 \description{
 It takes as inputs two pollen sequences produced by the function \emph{PrepareInputSequences}, and computes the best slotting.
