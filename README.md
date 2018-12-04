@@ -17,21 +17,35 @@ library(IgnexCompare)
 seqB=SequenceB[c(7,16,25,29,32,36,39), ]
 seqA=SequenceA[c(6,11,22,24,29,31,38,39,43,45), ]
 
-#Preparing input data
-sequences=PrepareInputSequences(sequence.A=seqA, sequence.B=seqB, sequence.A.name="Abernethy Forest 1970" , sequence.B.name="Abernethy Forest 1974", if.empty.cases="interpolate", output.type="proportion")
+#PREPARING INPUT DATA
+##################################################
+sequences=PrepareSequences(sequence.A=seqA, sequence.B=seqB, sequence.A.name="Abernethy Forest 1970" , sequence.B.name="Abernethy Forest 1974", if.empty.cases="zero", transformation="proportion")
 names(sequences)
 sequences$metadata
 sequences$sequence.A
 sequences$sequence.B
 
-#Computing manhattan distances among samples and plotting distance matrix (this step is also done by the function SeqSlotClassic, so it is here as demonstration)
+#computing distance matrix
 sequences=DistanceMatrix(sequences=sequences, method="manhattan")
-PlotDistanceMatrix(sequences$distance.matrix, main="Manhattan distance")
+sequences$distance.matrix
 
-#Compute sequence slotting
-slotting.results=SeqSlotClassic(sequences=sequences)
-slotting.results$psi.classic
+#WITH NO DIAGONALS
+#COMPUTING SLOTTING AND p-value THROUGH DISTANCE MATRIX RANDOMIZATION
+##########################################################################
+sequences.nodiagonal=SequenceSlotting(sequences=sequences, compute.p.value=TRUE, method="manhattan", diagonal=FALSE)
+sequences.nodiagonal$psi
+sequences.nodiagonal$p.value
 
-#Compute sequence slotting for sequences with different sample size using the average of n bootstraps
-results.equal.sample.size=SeqSlotEqualSamples(sequences=sequences, sampling.multiplier=100)
-results.equal.sample.size$psi.classic
+#plotting the distance matrix and the best alignment among sequences
+PlotSequenceSlotting(sequences.nodiagonal)
+
+#WITH DIAGONALS
+#COMPUTING SLOTTING AND p-value THROUGH DISTANCE MATRIX RANDOMIZATION
+##########################################################################
+sequences.diagonal=SequenceSlotting(sequences=sequences, compute.p.value=TRUE, method="manhattan", diagonal=TRUE)
+sequences.diagonal$psi
+sequences.diagonal$p.value
+
+#plotting the distance matrix and the best alignment among sequences
+PlotSequenceSlotting(sequences.diagonal)
+
