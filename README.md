@@ -2,7 +2,7 @@
 Tools to compare pollen sequences (work in progress)
 
 
-##SEQUENCE SLOTTING##
+SEQUENCE SLOTTING
 
 ```R
 #Installing and loading a required package
