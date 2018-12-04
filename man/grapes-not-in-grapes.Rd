@@ -12,6 +12,9 @@ x \%not-in\% y
 \value{
 A dataframe with n rows, and a predefined set of columns
 }
+\description{
+Small silly functions
+}
 \author{
 Blas Benito <blasbenito@gmail.com>
 }

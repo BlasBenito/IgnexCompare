@@ -15,7 +15,7 @@ seqA=SequenceA[c(6,11,22,24,29,31,38,39,43,45), ]
 
 #PREPARING INPUT DATA
 ##################################################
-sequences=PrepareInputSequences(sequence.A=seqA, sequence.B=seqB, sequence.A.name="Abernethy Forest 1970" , sequence.B.name="Abernethy Forest 1974", if.empty.cases="zero", transformation="proportion")
+sequences=PrepareSequences(sequence.A=seqA, sequence.B=seqB, sequence.A.name="Abernethy Forest 1970" , sequence.B.name="Abernethy Forest 1974", if.empty.cases="zero", transformation="proportion")
 names(sequences)
 sequences$metadata
 sequences$sequence.A
@@ -33,19 +33,17 @@ sequences.nodiagonal$psi
 sequences.nodiagonal$p.value
 
 #plotting the distance matrix and the best alignment among sequences
-PlotDistanceMatrix(sequences.nodiagonal$distance.matrix, title="Manhattan distance")
-lines(sequences.nodiagonal$pairings$A, sequences.nodiagonal$pairings$B)
+PlotSequenceSlotting(sequences.nodiagonal)
 
 #WITH DIAGONALS
 #COMPUTING SLOTTING AND p-value THROUGH DISTANCE MATRIX RANDOMIZATION
 ##########################################################################
-sequences.diagonal=SeqSlotClassic(sequences=sequences, compute.p.value=TRUE, method="manhattan", diagonal=TRUE)
+sequences.diagonal=SequenceSlotting(sequences=sequences, compute.p.value=TRUE, method="manhattan", diagonal=TRUE)
 sequences.diagonal$psi
 sequences.diagonal$p.value
 
 #plotting the distance matrix and the best alignment among sequences
-PlotDistanceMatrix(sequences.diagonal$distance.matrix, title="Manhattan distance")
-lines(sequences.diagonal$pairings$A, sequences.diagonal$pairings$B)
+PlotSequenceSlotting(sequences.diagonal)
 
 
 #TESTING CORRELATION BETWEEN PSI VALUES PRODUCED BY DIAGONAL AND NON DIAGONAL ANALYSES

@@ -18,28 +18,29 @@
 #' results.table=GenerateResultsTable(10)
 #' str(results.table)
 #' @export
-PlotDistanceMatrix=function(distance.matrix, title=NULL, path=NULL){
+PlotSequenceSlotting=function(sequences, title=NULL, path=NULL){
 
-  if (is.null(title)){title="Distance matrix"}
+  if (is.null(title)){title="Sequence slotting"}
 
   # require(fields)
   require(RColorBrewer)
 
+  #getting data
+  distance.matrix <- sequences$distance.matrix
+  pairings <- sequences$pairings
+
   x.axis=as.numeric(rownames(distance.matrix))
   y.axis=as.numeric(colnames(distance.matrix))
 
-  image.plot(x.axis, y.axis, distance.matrix, xlab="Sequence A", ylab="Sequence B", main=title, col=colorRampPalette(rev(brewer.pal(9, "RdBu")))(max(distance.matrix)-min(distance.matrix)))
+  image.plot(x.axis,
+             y.axis,
+             distance.matrix,
+             xlab="Sequence A",
+             ylab="Sequence B",
+             main=title,
+             col=colorRampPalette(rev(brewer.pal(9, "RdBu")))(100))
 
-  #plotting path if it exists
-  if(!is.null(path)){
-    if (is.data.frame(path)==FALSE){print("The path is not a dataframe, I cannot plot it.")}
-    if (all(c("a", "b") %not-in% colnames(path))){"Columns 'a' and 'b' are absent, I cannot plot this path."}
-
-    if (is.data.frame(path)==TRUE & all(c("a", "b") %in% colnames(path))){
-      lines(path$a, path$b)
-    }
-
-  }
+  lines(pairings$A, pairings$B)
 
 }
 
