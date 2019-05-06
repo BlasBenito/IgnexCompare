@@ -163,7 +163,7 @@ PrepareSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B=NULL
 
   #COMPUTING PROPORTION
   #############################
-  if (transformation=="proportion"){
+  if (transformation %in% c("proportion", "prop", "Proportion", "Prop", "PROPORTION", "PROP")){
 
     sequence.A=sweep(sequence.A, 1, rowSums(sequence.A), FUN="/")
     sequence.B=sweep(sequence.B, 1, rowSums(sequence.B), FUN="/")
@@ -172,7 +172,7 @@ PrepareSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B=NULL
 
   #COMPUTING PERCENTAGE
   ############################
-  if (transformation=="percentage"){
+  if (transformation %in% c("percentage", "percent", "Percentage", "Percent", "PERCENTAGE", "PERCENT")){
 
     sequence.A=sweep(sequence.A, 1, rowSums(sequence.A), FUN="/")*100
     sequence.B=sweep(sequence.B, 1, rowSums(sequence.B), FUN="/")*100
@@ -181,7 +181,7 @@ PrepareSequences=function(sequence.A=NULL, sequence.A.name=NULL, sequence.B=NULL
 
   #COMPUTING HELLINGER TRANSFORMATION
   #############################
-  if (transformation=="hellinger"){
+  if (transformation %in% c("hellinger", "Hellinger", "HELLINGER", "Hell", "hell", "HELL")){
 
     sequence.A=sqrt(sweep(sequence.A, 1, rowSums(sequence.A), FUN="/"))
     sequence.B=sqrt(sweep(sequence.B, 1, rowSums(sequence.B), FUN="/"))
