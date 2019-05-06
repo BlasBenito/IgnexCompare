@@ -155,6 +155,8 @@ DistanceMatrix <- function(sequences, method = NULL){
 
 #' @export
 .ChiDistance <- function(x, y){
+  x[x==0] <- 0.00001
+  y[y==0] <- 0.00001
   casewise.sum <- x + y
   y <- y / sum(y)
   x <- x / sum(x)
