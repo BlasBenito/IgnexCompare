@@ -29,7 +29,7 @@ SequenceSlotting=function(sequences=NULL, compute.p.value=NULL, method=NULL, sil
   if (is.null(method)==TRUE){method="manhattan"}
 
   #checking if there is a distance matrix in the input object or the user wants to change the method to compute the distance matrix
-  if (!is.matrix(sequences$distance.matrix) | method!="manhattan"){
+  if (!is.matrix(sequences$distance.matrix)){
     sequences=DistanceMatrix(sequences=sequences, method=method)
   }
 
