@@ -6,7 +6,7 @@ roxygen2::roxygenise()
 
 
 #test
-# install_github("IGNEX/IgnexCompare")
+install_github("IGNEX/IgnexCompare")
 library(IgnexCompare)
 
 #Recreating example of the book "Numerical methods in Quaternary pollen analysis" (Birks and Gordon, 1985)
@@ -119,7 +119,10 @@ slotting.results$p.value
 ########################################################################
 #creating example data
 sequences.list<-list(SequenceA, SequenceB, SequenceC)
-names(sequences.list)<-c("A", "B")
+names(sequences.list)<-c("A", "B", "C")
+
+#testing the function
+sequences.multiple <- PreparingSequencesMultiple(sequences.list=list(A=SequenceA, B=SequenceB, C=SequenceC), if.columns.mismatch="drop", if.empty.cases="zero", transformation="proportion")
 
 #PREPARING SEQUENCES MULTIPLE
 ########################################################################
@@ -193,7 +196,7 @@ PreparingSequencesMultiple = function(sequences.list=NULL, if.columns.mismatch=N
       if.columns.mismatch="drop"
     }
 
-    if (transformation %not-in% c("drop", "to.zero")){
+    if (if.columns.mismatch %not-in% c("drop", "to.zero")){
       stop("The 'if.columns.mismatch' argument only accepts the values: 'drop' and 'to.zero'.")
     }
 

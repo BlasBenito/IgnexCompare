@@ -10,128 +10,166 @@
 #' @author Blas Benito <blasbenito@gmail.com>
 #' @examples
 #' @export
-DistanceMatrix=function(sequences, method=NULL){
+DistanceMatrix <- function(sequences, method = NULL){
 
   #default value
-  if (is.null(method)==TRUE){method="manhattan"}
-
-  #error in method name
-  if (method!="manhattan" & method!="hellinger" & method!="euclidean"){
-    stop("The 'method' name should be either 'manhattan' or 'hellinger'")
-  }
+  if (is.null(method)==TRUE){method <- "manhattan"}
 
   #getting objects from the list
-  sequence.A=sequences$sequence.A
-  sequence.B=sequences$sequence.B
+  sequence.A <- sequences$sequence.A
+  sequence.B <- sequences$sequence.B
 
   #computing row size
-  nrow.sequence.A=nrow(sequence.A)
-  nrow.sequence.B=nrow(sequence.B)
+  nrow.sequence.A <- nrow(sequence.A)
+  nrow.sequence.B <- nrow(sequence.B)
 
   #creating results matrix
-  distance.matrix = matrix(ncol=nrow.sequence.B, nrow=nrow.sequence.A)
+  distance.matrix <- matrix(ncol = nrow.sequence.B, nrow = nrow.sequence.A)
 
   #COMPUTING DISTANCE MATRIX
   ############################################################################################
   #computing manhattan distance
-  if (method=="manhattan"){
+  if (method %in% c("manhattan", "Manhattan", "MANHATTAN", "man", "Man", "MAN")){
     for (i in 1:nrow.sequence.A){
       for (j in 1:nrow.sequence.B){
-        distance.matrix[i,j]=.ManhattanDistance(sequence.A[i,], sequence.B[j,])
+        distance.matrix[i,j] <- .ManhattanDistance(x = sequence.A[i,], y = sequence.B[j,])
       }
     }
   }
 
   #computing hellinger distance
-  if (method=="hellinger"){
+  if (method %in% c("hellinger", "Hellinger", "HELLINGER", "Hell", "hell", "HELL")){
     for (i in 1:nrow.sequence.A){
       for (j in 1:nrow.sequence.B){
-        distance.matrix[i,j]=.HellingerDistance(sequence.A[i,], sequence.B[j,])
+        distance.matrix[i,j] <- .HellingerDistance(x = sequence.A[i,], y = sequence.B[j,])
+      }
+    }
+  }
+
+  #computing chi distance
+  if (method %in% c("chi", "Chi", "CHI", "chi.distance", "Chi.distance", "CHI.DISTANCE")){
+    for (i in 1:nrow.sequence.A){
+      for (j in 1:nrow.sequence.B){
+        distance.matrix[i,j] <- .ChiDistance(x = sequence.A[i,], y = sequence.B[j,])
       }
     }
   }
 
   #computing euclidean distance
-  if (method=="euclidean"){
+  if (method %in% c("euclidean", "Euclidean", "EUCLIDEAN", "euc", "Euc", "EUC")){
     for (i in 1:nrow.sequence.A){
       for (j in 1:nrow.sequence.B){
-        distance.matrix[i,j]=.EuclideanDistance(sequence.A[i,], sequence.B[j,])
+        distance.matrix[i,j] <- .EuclideanDistance(x = sequence.A[i,], y = sequence.B[j,])
       }
     }
   }
 
   #seting col and row names
-  colnames(distance.matrix)=rownames(sequence.B)
-  rownames(distance.matrix)=rownames(sequence.A)
+  colnames(distance.matrix) <- rownames(sequence.B)
+  rownames(distance.matrix) <- rownames(sequence.A)
 
 
   #COMPUTING AUTOSUMS
   ############################################################################################
-  distances.sequence.A=vector()
-  distances.sequence.B=vector()
+  distances.sequence.A <- vector()
+  distances.sequence.B <- vector()
 
   #computing manhattan distance
-  if (method=="manhattan"){
+  if (method %in% c("manhattan", "Manhattan", "MANHATTAN", "man", "Man", "MAN")){
     for (i in 1:(nrow.sequence.A-1)){
-      distances.sequence.A[i]=.ManhattanDistance(sequence.A[i, ], sequence.A[i+1, ])
+      distances.sequence.A[i] <- .ManhattanDistance(x = sequence.A[i, ], y = sequence.A[i+1, ])
     }
 
     for (j in 1:(nrow.sequence.B-1)){
-      distances.sequence.B[j]=.ManhattanDistance(sequence.B[j, ], sequence.B[j+1, ])
+      distances.sequence.B[j] <- .ManhattanDistance(x = sequence.B[j, ], y = sequence.B[j+1, ])
     }
   }
 
 
-  #computing manhattan distance
-  if (method=="hellinger"){
+  #computing hellinger distance
+  if (method %in% c("hellinger", "Hellinger", "HELLINGER", "Hell", "hell", "HELL")){
     for (i in 1:nrow.sequence.A-1){
-      distances.sequence.A[i]=.HellingerDistance(sequence.A[i], sequence.A[i+1])
+      distances.sequence.A[i] <- .HellingerDistance(x = sequence.A[i], y = sequence.A[i+1])
     }
 
     for (j in 1:nrow.sequence.B-1){
-      distances.sequence.B[j]=.HellingerDistance(sequence.B[j], sequence.B[j+1])
+      distances.sequence.B[j] <- .HellingerDistance(x = sequence.B[j], y = sequence.B[j+1])
     }
   }
 
-  #computing manhattan distance
-  if (method=="euclidean"){
+  #computing euclidean distance
+  if (method %in% c("euclidean", "Euclidean", "EUCLIDEAN", "euc", "Euc", "EUC")){
     for (i in 1:nrow.sequence.A-1){
-      distances.sequence.A[i]=.EuclideanDistance(sequence.A[i], sequence.A[i+1])
+      distances.sequence.A[i] <- .EuclideanDistance(x = sequence.A[i], y = sequence.A[i+1])
     }
 
     for (j in 1:nrow.sequence.B-1){
-      distances.sequence.B[j]=.EuclideanDistance(sequence.B[j], sequence.B[j+1])
+      distances.sequence.B[j] <- .EuclideanDistance(x = sequence.B[j], y = sequence.B[j+1])
+    }
+  }
+
+  #computing chi distance
+  if (method %in% c("chi", "Chi", "CHI", "chi.squared", "Chi.squared", "CHI.SQUARED")){
+    for (i in 1:nrow.sequence.A-1){
+      distances.sequence.A[i] <- .EuclideanDistance(x = sequence.A[i], y = sequence.A[i+1])
+    }
+
+    for (j in 1:nrow.sequence.B-1){
+      distances.sequence.B[j] <- .EuclideanDistance(x = sequence.B[j], y = sequence.B[j+1])
     }
   }
 
   #SUMMING DISTANCES
-  sum.distances.sequence.A=sum(distances.sequence.A)
-  sum.distances.sequence.B=sum(distances.sequence.B)
+  sum.distances.sequence.A <- sum(distances.sequence.A)
+  sum.distances.sequence.B <- sum(distances.sequence.B)
 
   #WRITE RESULTS
   ############################################################################################
-  previous.names=names(sequences)
+  previous.names <- names(sequences)
 
   #writting new elements in the input list
-  sequences$distance.matrix=distance.matrix
-  sequences$sum.distances.sequence.A=sum.distances.sequence.A
-  sequences$sum.distances.sequence.B=sum.distances.sequence.B
+  sequences$distance.matrix <- distance.matrix
+  sequences$sum.distances.sequence.A <- sum.distances.sequence.A
+  sequences$sum.distances.sequence.B <- sum.distances.sequence.B
 
   return(sequences)
 }
 
-
+#check https://www.rdocumentation.org/packages/analogue/versions/0.17-1/source
 #' @export
-.ManhattanDistance=function(x, y){
+.ManhattanDistance <- function(x, y){
   sum(abs(x - y))
 }
 
 #' @export
-.HellingerDistance=function(x, y){
-  sqrt(1/2 * sum(sqrt(x)-sqrt(y))^2)
+.EuclideanDistance <- function(x, y){
+  sqrt(sum((x - y)^2))
 }
 
 #' @export
-.EuclideanDistance=function(x, y){
-  sqrt(sum((x - y)^2))
+.ChordDistance <- function(x, y){
+  x <- sqrt(x)
+  y <- sqrt(y)
+  .EuclideanDistance(x, y)
 }
+
+#' @export
+.ChiDistance <- function(x, y){
+  casewise.sum <- x + y
+  y <- y / sum(y)
+  x <- x / sum(x)
+  sqrt(sum(((x - y)^2) / (casewise.sum / sum(casewise.sum))))
+}
+
+
+#' @export
+.HellingerDistance  <-  function(x, y){
+  #Legendre: the Hellinger distance is the Chord distance computed on square-rooted species abundance data
+  #add 0.0001 so there are no zero entries
+  x[x==0] <- 0.00001
+  y[y==0] <- 0.00001
+  #compute distance
+  sqrt(1/2 * sum(sqrt(x) - sqrt(y))^2)
+}
+
+
